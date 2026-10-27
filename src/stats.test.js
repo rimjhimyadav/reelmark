@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getStreaks, getWatchEvents, hoursPerMonth, splitMinutes, topGenres, totalMinutes } from "./stats";
+import { getStreaks, getWatchEvents, hoursPerMonth, splitMinutes, topGenres, totalMinutes, yearSummary } from "./stats";
 
 describe("splitMinutes", () => {
   test("turns minutes into days, hours and minutes", () => {
@@ -58,5 +58,20 @@ describe("topGenres", () => {
       { name: "Drama", count: 2 },
       { name: "Comedy", count: 1 },
     ]);
+  });
+});
+
+describe("yearSummary", () => {
+  test("only counts the chosen year", () => {
+    const show = { id: 1, type: "tv", runtime: 30, rating: 4, genres: ["Drama"], watched: { "1-1": "2026-03-01T10:00:00", "1-2": "2025-03-01T10:00:00" } };
+    const movie = { id: 2, type: "movie", runtime: 90, rating: 5, genres: ["Comedy"], watchedAt: "2026-05-01T10:00:00" };
+    const summary = yearSummary([show, movie], 2026);
+
+    expect(summary.minutes).toBe(120);
+    expect(summary.episodes).toBe(1);
+    expect(summary.movies).toBe(1);
+    expect(summary.topShow.item).toBe(show);
+    expect(summary.favorites[0]).toBe(movie); // you gave it 5 stars
+    expect(summary.bestMonth.label).toBe("May");
   });
 });

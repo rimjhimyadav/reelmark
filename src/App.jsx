@@ -13,6 +13,7 @@ import Library from "./pages/Library";
 import UpNext from "./pages/UpNext";
 import Calendar from "./pages/Calendar";
 import Stats from "./pages/Stats";
+import Wrapped from "./pages/Wrapped";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="/up-next" element={<UpNext />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/stats" element={<Stats />} />
+          <Route path="/wrapped" element={<Wrapped />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

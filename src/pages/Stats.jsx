@@ -12,6 +12,7 @@ import {
   totalMinutes,
 } from "../stats";
 import { formatDate, plural } from "../utils";
+import { Gift } from "lucide-react";
 import PageTitle from "../components/PageTitle";
 
 export default function Stats() {
@@ -59,7 +60,15 @@ export default function Stats() {
 
   return (
     <>
-      <PageTitle title="Stats" text="What you’ve been watching." />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageTitle title="Stats" text="What you’ve been watching." />
+        <Link
+          to="/wrapped"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-semibold text-accent-text hover:opacity-90"
+        >
+          <Gift size={18} /> Your {new Date().getFullYear()} wrapped
+        </Link>
+      </div>
 
       <section className="rounded-2xl bg-panel p-6">
         <p className="text-sm font-semibold tracking-widest text-muted uppercase">Time spent watching</p>

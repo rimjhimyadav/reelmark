@@ -127,3 +127,52 @@ export function heatmapDays(dayCounts, today = new Date()) {
   }
   return days;
 }
+
+// everything for the "wrapped" card: what you watched in one year
+export function yearSummary(items, year) {
+  const events = getWatchEvents(items).filter((event) => dayKey(event.date).startsWith(String(year)));
+
+  // the show you watched the most episodes of
+  const episodesPerShow = {};
+  for (const event of events) {
+    if (event.item.type === "tv") {
+      const key = event.item.id;
+      episodesPerShow[key] = (episodesPerShow[key] || 0) + 1;
+    }
+  }
+  let topShow = null;
+  for (const event of events) {
+    const count = episodesPerShow[event.item.id];
+    if (event.item.type === "tv" && (!topShow || count > topShow.episodes)) {
+      topShow = { item: event.item, episodes: count };
+    }
+  }
+
+  // every title you watched something of this year, only once
+  const watchedItems = [];
+  for (const event of events) {
+    if (!watchedItems.includes(event.item)) watchedItems.push(event.item);
+  }
+
+  // your 3 favorites: highest rated by you, then by TMDB score
+  const favorites = [...watchedItems]
+    .sort((a, b) => b.rating - a.rating || (b.tmdbRating || 0) - (a.tmdbRating || 0))
+    .slice(0, 3);
+
+  // the month with the most watch time
+  const months = hoursPerMonth(events, 12, new Date(year, 11, 1));
+  const bestMonth = months.reduce((best, month) => (month.minutes > best.minutes ? month : best), months[0]);
+
+  const genres = topGenres(watchedItems, 1);
+
+  return {
+    minutes: totalMinutes(events),
+    episodes: events.filter((event) => event.item.type === "tv").length,
+    movies: events.filter((event) => event.item.type === "movie").length,
+    titles: watchedItems.length,
+    topGenre: genres.length > 0 ? genres[0].name : null,
+    topShow,
+    favorites,
+    bestMonth: bestMonth.minutes > 0 ? bestMonth : null,
+  };
+}

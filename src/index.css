@@ -2,7 +2,7 @@
 
 /* all the colors of the app live here, so changing the theme later is easy */
 @theme {
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter Variable", system-ui, sans-serif;
 
   --color-page: #0e0f13;
   --color-panel: #16181d;
