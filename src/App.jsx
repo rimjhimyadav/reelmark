@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 import Sidebar from "./components/Sidebar";
 import MobileNav from "./components/MobileNav";
+import { useSettings } from "./store/settings";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import Search from "./pages/Search";
@@ -15,6 +16,7 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const sidebarCollapsed = useSettings((state) => state.sidebarCollapsed);
 
   // when you open a new page, start at the top (react router doesn't do this by itself)
   useEffect(() => {
@@ -39,7 +41,11 @@ export default function App() {
       <MobileNav />
 
       {/* left padding leaves space for the sidebar, bottom padding for the bottom bar on phones */}
-      <main className="px-4 pt-6 pb-24 md:pl-68 md:pr-8 md:pt-8 md:pb-12">
+      <main
+        className={`px-4 pt-6 pb-24 transition-[padding] md:pr-8 md:pt-8 md:pb-12 ${
+          sidebarCollapsed ? "md:pl-28" : "md:pl-68"
+        }`}
+      >
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
