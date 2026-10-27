@@ -5,6 +5,11 @@ const API_KEY = import.meta.env.VITE_TMDB_KEY;
 // api.tmdb.org is the same api, but some indian internet providers (like jio) block api.themoviedb.org
 const BASE_URL = "https://api.tmdb.org/3";
 
+// genre ids we need for anime. TMDB has no "anime" type,
+// so anime = japanese animation shows (without kids shows)
+const ANIMATION = 16;
+const KIDS = 10762;
+
 async function get(path, params = {}) {
   const url = new URL(BASE_URL + path);
   url.searchParams.set("api_key", API_KEY);
@@ -65,12 +70,11 @@ export async function getTrendingShows() {
   return toItems(data, "tv");
 }
 
-// TMDB has no "anime" category, so we ask for japanese animation (genre 16)
 export async function getPopularAnime() {
   const data = await get("/discover/tv", {
-    with_genres: 16,
+    with_genres: ANIMATION,
     with_original_language: "ja",
-    without_genres: 10762, // skip kids shows like doraemon
+    without_genres: KIDS,
     sort_by: "popularity.desc",
   });
   return toItems(data, "tv");
@@ -85,4 +89,53 @@ export async function getUpcomingMovies() {
     with_release_type: "2|3", // 2 = in theaters, 3 = wide release
   });
   return toItems(data, "movie");
+}
+
+// sort options for the explore page
+const SORT_PARAMS = {
+  popular: { sort_by: "popularity.desc" },
+  // without a minimum vote count, a movie with one 10/10 vote would be on top
+  top: { sort_by: "vote_average.desc", "vote_count.gte": 300 },
+  new: { sort_by: "date.desc", "vote_count.gte": 20 },
+};
+
+// used by the explore page: one page of movies, shows or anime
+export async function discover({ type, sort, genre, page }) {
+  const apiType = type === "movie" ? "movie" : "tv";
+  const dateField = apiType === "movie" ? "primary_release_date" : "first_air_date";
+  const today = new Date().toISOString().slice(0, 10);
+
+  const params = { ...SORT_PARAMS[sort], page };
+  if (params.sort_by === "date.desc") {
+    params.sort_by = dateField + ".desc";
+    params[dateField + ".lte"] = today; // only things that are already out
+  }
+
+  const genres = [];
+  if (type === "anime") {
+    genres.push(ANIMATION);
+    params.with_original_language = "ja";
+    params.without_genres = KIDS;
+  }
+  if (genre) genres.push(genre);
+  if (genres.length > 0) params.with_genres = genres.join(","); // comma means "has all of these"
+
+  const data = await get(`/discover/${apiType}`, params);
+  return {
+    items: toItems(data, apiType),
+    // TMDB never gives more than 500 pages
+    hasMore: page < Math.min(data.total_pages, 500),
+  };
+}
+
+export async function getGenres(type) {
+  const apiType = type === "movie" ? "movie" : "tv";
+  const data = await get(`/genre/${apiType}/list`);
+  if (type === "anime") {
+    // every anime is animation already, kids shows are hidden,
+    // and genres like news or talk show have no anime at all
+    const skip = ["Animation", "Kids", "News", "Reality", "Talk", "Soap", "Documentary"];
+    return data.genres.filter((genre) => !skip.includes(genre.name));
+  }
+  return data.genres;
 }
