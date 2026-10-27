@@ -64,9 +64,9 @@ export default function Stats() {
       <section className="rounded-2xl bg-panel p-6">
         <p className="text-sm font-semibold tracking-widest text-muted uppercase">Time spent watching</p>
         <div className="mt-3 flex flex-wrap items-end gap-6">
-          <BigNumber value={time.days} label="days" />
-          <BigNumber value={time.hours} label="hours" />
-          <BigNumber value={time.minutes} label="minutes" />
+          <BigNumber value={time.days} label={time.days === 1 ? "day" : "days"} />
+          <BigNumber value={time.hours} label={time.hours === 1 ? "hour" : "hours"} />
+          <BigNumber value={time.minutes} label={time.minutes === 1 ? "minute" : "minutes"} />
         </div>
         <p className="mt-4 text-sm text-muted">
           Movies {Math.round(movieMinutes / 60)}h · Shows {Math.round(showMinutes / 60)}h · Anime{" "}
