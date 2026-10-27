@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import { itemKey, useLibrary } from "../store/library";
 import { episodeKey, getNextEpisode } from "../progress";
 import { formatDate, formatRuntime, todayString } from "../utils";
+import ProgressBar from "./ProgressBar";
 
 // seasons and episodes of a show, with a tick for every episode
 export default function Episodes({ item }) {
@@ -79,9 +80,7 @@ function SeasonEpisodes({ item, season, watched }) {
             </span>
             <span className="font-semibold">{percent}%</span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-panel-light">
-            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${percent}%` }} />
-          </div>
+          <ProgressBar percent={percent} />
         </div>
 
         {aired.length > 0 && (

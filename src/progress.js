@@ -11,7 +11,7 @@ export function episodeKey(season, episode) {
 // every episode that is already out, in order
 export function airedEpisodes(item) {
   const list = [];
-  if (!item.lastAired) return list;
+  if (!item.lastAired || !item.seasons) return list;
 
   for (const season of item.seasons) {
     if (season.number > item.lastAired.season) break;

@@ -4,7 +4,9 @@ import { LayoutGrid, List, Search, Star } from "lucide-react";
 import { imageUrl } from "../api/tmdb";
 import { useLibrary } from "../store/library";
 import { STATUSES, getStatus } from "../statuses";
+import { episodeLabel, getNextEpisode, getProgress } from "../progress";
 import PageTitle from "../components/PageTitle";
+import ProgressBar from "../components/ProgressBar";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -190,6 +192,7 @@ function GridCard({ item }) {
       </div>
       <h3 className="mt-2 truncate text-sm font-semibold">{item.title}</h3>
       <MyStars rating={item.rating} year={item.year} />
+      <ShowProgress item={item} />
     </Link>
   );
 }
@@ -202,11 +205,31 @@ function ListRow({ item }) {
       <div className="min-w-0 flex-1">
         <h3 className="truncate font-semibold">{item.title}</h3>
         <MyStars rating={item.rating} year={item.year} />
+        <div className="max-w-xs">
+          <ShowProgress item={item} />
+        </div>
       </div>
       <span className="flex shrink-0 items-center gap-1.5 text-sm text-muted">
         <status.icon size={16} /> <span className="hidden sm:inline">{status.label}</span>
       </span>
     </Link>
+  );
+}
+
+// for shows: "S2 E5 next · 40%" and a bar. movies don't have episodes
+function ShowProgress({ item }) {
+  if (item.type !== "tv") return null;
+  const progress = getProgress(item);
+  if (progress.aired === 0) return null;
+
+  const next = getNextEpisode(item);
+  return (
+    <div className="mt-1.5">
+      <p className="mb-1 text-xs text-muted">
+        {next ? `${episodeLabel(next.season, next.episode)} next` : "Up to date"} · {progress.percent}%
+      </p>
+      <ProgressBar percent={progress.percent} className="h-1" />
+    </div>
   );
 }
 
