@@ -17,8 +17,8 @@ export const STATUSES = [
     label: "Plan to watch",
     hint: "Save it for later.",
     icon: Bookmark,
-    text: "text-violet-400",
-    badge: "bg-violet-500 text-white",
+    text: "text-zinc-300",
+    badge: "bg-zinc-500 text-white",
   },
   {
     key: "completed",
