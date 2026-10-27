@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Link } from "react-router";
 import { Check, Info } from "lucide-react";
-import { getSeason, getShowInfo, imageUrl } from "../api/tmdb";
+import { getSeason, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
-import { itemKey, useLibrary } from "../store/library";
+import useRefreshShows from "../hooks/useRefreshShows";
+import { useLibrary } from "../store/library";
 import { useSettings } from "../store/settings";
 import { episodeLabel, getNextEpisode, getProgress } from "../progress";
 import { formatDate, formatRuntime } from "../utils";
@@ -37,7 +38,6 @@ function sortShows(shows, sort) {
 
 export default function UpNext() {
   const items = Object.values(useLibrary((state) => state.items));
-  const updateShowInfo = useLibrary((state) => state.updateShowInfo);
   const [sort, setSort] = useState("recent");
 
   const shows = items.filter((item) => item.type === "tv" && (item.status === "watching" || item.status === "rewatching"));
@@ -47,18 +47,7 @@ export default function UpNext() {
   const ready = sortShows(shows.filter((show) => getNextEpisode(show)), sort);
   const waiting = shows.filter((show) => !getNextEpisode(show) && show.nextAir);
 
-  // a list of ids as text, so the effect below only runs again when a show is added or removed
-  const showIds = shows.map((show) => show.id).join(",");
-
-  // new episodes may have come out since you added a show, so ask TMDB again
-  useEffect(() => {
-    if (!showIds) return;
-    for (const id of showIds.split(",")) {
-      getShowInfo(id)
-        .then((info) => updateShowInfo(itemKey("tv", Number(id)), info))
-        .catch(() => {}); // not a big deal, we still have the old info
-    }
-  }, [showIds, updateShowInfo]);
+  useRefreshShows(shows);
 
   return (
     <>

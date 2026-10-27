@@ -19,6 +19,7 @@ function newLibraryItem(item, status) {
     poster: item.poster,
     backdrop: item.backdrop,
     year: item.year,
+    releaseDate: item.date, // for the calendar
     genres: item.genres,
     tmdbRating: item.rating, // the TMDB score. "rating" below is your own stars
     runtime: item.runtime, // for shows this is one episode

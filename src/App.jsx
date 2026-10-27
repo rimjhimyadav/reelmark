@@ -11,6 +11,7 @@ import Search from "./pages/Search";
 import DetailsPage from "./pages/Details";
 import Library from "./pages/Library";
 import UpNext from "./pages/UpNext";
+import Calendar from "./pages/Calendar";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/tv/:id" element={<DetailsPage type="tv" />} />
           <Route path="/library" element={<Library />} />
           <Route path="/up-next" element={<UpNext />} />
+          <Route path="/calendar" element={<Calendar />} />
           <Route path="/stats" element={<Stats />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />

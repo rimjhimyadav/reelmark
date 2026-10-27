@@ -27,7 +27,7 @@ function Details({ type, id }) {
   // if you track this title, save the newest info (a new season may be out, the score changes)
   useEffect(() => {
     if (!item) return;
-    const info = { tmdbRating: item.rating };
+    const info = { tmdbRating: item.rating, releaseDate: item.date };
     if (item.type === "tv") {
       info.seasons = item.seasons;
       info.lastAired = item.lastAired;
