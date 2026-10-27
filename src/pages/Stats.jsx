@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useLibrary } from "../store/library";
 import {
@@ -106,6 +106,12 @@ function BigNumber({ value, label }) {
 function Heatmap({ dayCounts }) {
   const days = heatmapDays(dayCounts);
   const [hovered, setHovered] = useState(null);
+  const scrollRef = useRef(null);
+
+  // on small screens the heatmap doesn't fit, so start scrolled to today (the right end)
+  useEffect(() => {
+    scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+  }, []);
 
   function boxColor(count) {
     if (count === 0) return "bg-panel-light";
@@ -120,17 +126,18 @@ function Heatmap({ dayCounts }) {
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-lg font-bold">Your last 12 months</h2>
         <p className="text-sm text-muted">
-          {hovered ? `${formatDate(hovered.key)} · ${plural(hovered.count, "thing")} watched` : "Hover a day to see it"}
+          {hovered ? `${formatDate(hovered.key)} · ${plural(hovered.count, "thing")} watched` : "Hover or tap a day"}
         </p>
       </div>
 
-      <div className="no-scrollbar overflow-x-auto" onMouseLeave={() => setHovered(null)}>
+      <div ref={scrollRef} className="no-scrollbar overflow-x-auto" onMouseLeave={() => setHovered(null)}>
         {/* 7 rows (sunday to saturday), new columns are added for every week */}
         <div className="grid w-max grid-flow-col grid-rows-7 gap-1">
           {days.map((day) => (
             <div
               key={day.key}
               onMouseEnter={() => setHovered(day)}
+              onClick={() => setHovered(day)}
               title={`${formatDate(day.key)}: ${day.count}`}
               className={`size-3 rounded-[3px] ${boxColor(day.count)} ${
                 hovered && hovered.key === day.key ? "ring-1 ring-text" : ""

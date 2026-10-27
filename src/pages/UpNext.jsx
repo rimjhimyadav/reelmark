@@ -103,8 +103,8 @@ function NextEpisodeCard({ show }) {
   const picture = episode && episode.still ? imageUrl(episode.still, "w500") : imageUrl(show.backdrop, "w780");
 
   return (
-    <div className="flex gap-4 rounded-2xl bg-panel p-3">
-      <Link to={`/tv/${show.id}`} className="relative w-40 shrink-0 overflow-hidden rounded-xl bg-panel-light sm:w-56">
+    <div className="flex min-w-0 gap-4 rounded-2xl bg-panel p-3">
+      <Link to={`/tv/${show.id}`} className="relative w-32 shrink-0 overflow-hidden rounded-xl bg-panel-light sm:w-56">
         {picture && <img src={picture} alt="" className="aspect-video size-full object-cover" />}
       </Link>
 

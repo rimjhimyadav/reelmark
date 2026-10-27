@@ -93,6 +93,8 @@ function SeasonEpisodes({ item, season, watched }) {
       {shown.map((episode) => {
         const isOut = episode.airDate && episode.airDate <= today;
         const isWatched = Boolean(watched[episodeKey(season, episode.number)]);
+        let airText = "TBA";
+        if (episode.airDate) airText = isOut ? formatDate(episode.airDate) : `Airs ${formatDate(episode.airDate)}`;
 
         return (
           <div key={episode.number} className="flex items-center gap-4 border-b border-line/60 px-4 py-3 last:border-0">
@@ -110,11 +112,13 @@ function SeasonEpisodes({ item, season, watched }) {
             </button>
 
             <span className="w-8 shrink-0 text-sm text-muted">E{episode.number}</span>
-            <span className={`min-w-0 flex-1 truncate font-medium ${isWatched ? "text-muted" : ""}`}>{episode.name}</span>
+            <div className="min-w-0 flex-1">
+              <p className={`truncate font-medium ${isWatched ? "text-muted" : ""}`}>{episode.name}</p>
+              {/* on phones the date goes under the name, there's no room next to it */}
+              <p className="text-xs text-muted sm:hidden">{airText}</p>
+            </div>
             <span className="hidden shrink-0 text-sm text-muted sm:block">{formatRuntime(episode.runtime)}</span>
-            <span className="w-28 shrink-0 text-right text-sm text-muted">
-              {isOut ? formatDate(episode.airDate) : episode.airDate ? `Airs ${formatDate(episode.airDate)}` : "TBA"}
-            </span>
+            <span className="hidden w-32 shrink-0 text-right text-sm text-muted sm:block">{airText}</span>
           </div>
         );
       })}
