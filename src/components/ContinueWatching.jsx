@@ -3,6 +3,7 @@ import { imageUrl } from "../api/tmdb";
 import { useLibrary } from "../store/library";
 import { episodeLabel, getNextEpisode, getProgress } from "../progress";
 import ProgressBar from "./ProgressBar";
+import SectionTitle from "./SectionTitle";
 
 // row on home with the shows you're in the middle of
 export default function ContinueWatching() {
@@ -17,12 +18,11 @@ export default function ContinueWatching() {
 
   return (
     <section className="mt-10">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold">Continue watching</h2>
+      <SectionTitle label="Your shows" title="Continue watching">
         <Link to="/up-next" className="text-sm font-semibold text-muted hover:text-text">
           See all
         </Link>
-      </div>
+      </SectionTitle>
 
       <div className="no-scrollbar flex gap-4 overflow-x-auto">
         {shows.map((show) => {

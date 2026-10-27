@@ -10,6 +10,7 @@ import StarRating from "../components/StarRating";
 import TrackButton from "../components/TrackButton";
 import Episodes from "../components/Episodes";
 import { PosterRow } from "../components/Row";
+import SectionTitle from "../components/SectionTitle";
 
 // the same page is used for /movie/123 and /tv/456
 export default function DetailsPage({ type }) {
@@ -120,7 +121,7 @@ function Details({ type, id }) {
         <WhereToWatch providers={item.streaming} link={item.watchLink} />
       </div>
 
-      {item.recommendations.length > 0 && <PosterRow title="More like this" items={item.recommendations} />}
+      {item.recommendations.length > 0 && <PosterRow label="Recommended" title="More like this" items={item.recommendations} />}
 
       {showTrailer && (
         <Modal title={`${item.title} trailer`} wide onClose={() => setShowTrailer(false)}>
@@ -155,7 +156,7 @@ function MyRating({ item }) {
 function Cast({ cast }) {
   return (
     <section>
-      <h2 className="mb-4 text-xl font-bold">Cast</h2>
+      <SectionTitle label="Cast" title="Who's in it" />
       <div className="no-scrollbar flex gap-4 overflow-x-auto">
         {cast.map((person) => (
           <div key={person.id} className="w-24 shrink-0 text-center">

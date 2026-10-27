@@ -4,6 +4,7 @@ import { getGenres, getHiddenGems, getProviders, getTopTen, imageUrl } from "../
 import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
 import Row from "../components/Row";
+import SectionTitle from "../components/SectionTitle";
 
 // "see all" links go to the browse page with filters in the url
 function browseLink(filters) {
@@ -61,7 +62,7 @@ export default function Explore() {
       <Providers />
       <TopTen />
 
-      <Section title="Pick a mood">
+      <Section label="Moods" title="What are you in the mood for?">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {MOODS.map((mood) => (
             <Link
@@ -76,11 +77,11 @@ export default function Explore() {
         </div>
       </Section>
 
-      <Row title="Hidden gems" load={getHiddenGems} />
+      <Row label="Hidden gems" title="Great movies you might have missed" note="Loved by the people who found them." load={getHiddenGems} />
 
       <GenreTiles />
 
-      <Section title="By decade">
+      <Section label="Time travel" title="Best of every decade">
         <div className="no-scrollbar flex gap-3 overflow-x-auto">
           {DECADES.map((decade) => (
             <Link
@@ -97,10 +98,10 @@ export default function Explore() {
   );
 }
 
-function Section({ title, children }) {
+function Section({ label, title, note, children }) {
   return (
     <section className="mt-10">
-      <h2 className="mb-4 text-xl font-bold">{title}</h2>
+      <SectionTitle label={label} title={title} note={note} />
       {children}
     </section>
   );
@@ -111,7 +112,7 @@ function Providers() {
   if (!providers) return null;
 
   return (
-    <Section title="What's on your apps">
+    <Section label="Streaming" title="What's on your apps" note="Streaming in India right now.">
       <div className="grid grid-cols-4 gap-3 md:grid-cols-8">
         {providers.map((provider) => (
           <Link
@@ -138,7 +139,7 @@ function TopTen() {
   if (!items) return null;
 
   return (
-    <Section title="Top 10 today">
+    <Section label="Top 10" title="Most watched today" note="Movies and shows, updated every day.">
       <div className="no-scrollbar flex gap-2 overflow-x-auto">
         {items.map((item, index) => (
           <Link key={item.id} to={`/${item.type}/${item.id}`} className="group flex shrink-0 items-end">
@@ -167,7 +168,7 @@ function GenreTiles() {
   if (!genres) return null;
 
   return (
-    <Section title="Genres">
+    <Section label="Genres" title="Find it by genre">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {genres.map((genre, index) => (
           <Link

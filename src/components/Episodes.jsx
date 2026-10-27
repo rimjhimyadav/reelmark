@@ -7,6 +7,7 @@ import { useSettings } from "../store/settings";
 import { episodeKey, getNextEpisode } from "../progress";
 import { formatDate, formatRuntime, todayString } from "../utils";
 import ProgressBar from "./ProgressBar";
+import SectionTitle from "./SectionTitle";
 
 // seasons and episodes of a show, with a tick for every episode
 export default function Episodes({ item }) {
@@ -19,7 +20,7 @@ export default function Episodes({ item }) {
 
   return (
     <section className="mb-10">
-      <h2 className="mb-4 text-xl font-bold">Episodes</h2>
+      <SectionTitle label="Episodes" title="Track your progress" />
 
       <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
         {item.seasons.map((s) => {

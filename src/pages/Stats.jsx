@@ -14,6 +14,7 @@ import {
 import { formatDate, plural } from "../utils";
 import { Gift } from "lucide-react";
 import PageTitle from "../components/PageTitle";
+import SectionTitle from "../components/SectionTitle";
 
 export default function Stats() {
   const items = Object.values(useLibrary((state) => state.items));
@@ -132,12 +133,11 @@ function Heatmap({ dayCounts }) {
 
   return (
     <section className="mt-4 rounded-2xl bg-panel p-6">
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-bold">Your last 12 months</h2>
+      <SectionTitle label="Activity" title="Your last 12 months">
         <p className="text-sm text-muted">
           {hovered ? `${formatDate(hovered.key)} · ${plural(hovered.count, "thing")} watched` : "Hover or tap a day"}
         </p>
-      </div>
+      </SectionTitle>
 
       <div ref={scrollRef} className="no-scrollbar overflow-x-auto" onMouseLeave={() => setHovered(null)}>
         {/* 7 rows (sunday to saturday), new columns are added for every week */}
@@ -174,10 +174,9 @@ function MonthChart({ months }) {
 
   return (
     <section className="rounded-2xl bg-panel p-6">
-      <div className="mb-6 flex items-baseline justify-between">
-        <h2 className="text-lg font-bold">Hours per month</h2>
+      <SectionTitle label="Time" title="Hours per month">
         <p className="text-sm text-muted">{hovered ? `${hovered.label}: ${plural(hovered.hours, "hour")}` : ""}</p>
-      </div>
+      </SectionTitle>
 
       <div className="flex h-44 items-end gap-3 border-b border-line" onMouseLeave={() => setHovered(null)}>
         {months.map((month) => (
@@ -212,7 +211,7 @@ function GenreList({ genres }) {
 
   return (
     <section className="rounded-2xl bg-panel p-6">
-      <h2 className="mb-6 text-lg font-bold">Top genres</h2>
+      <SectionTitle label="Taste" title="Top genres" />
       <div className="flex flex-col gap-4">
         {genres.map((genre) => (
           <div key={genre.name}>

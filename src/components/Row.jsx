@@ -2,17 +2,18 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import useFetch from "../hooks/useFetch";
 import PosterCard, { PosterSkeleton } from "./PosterCard";
+import SectionTitle from "./SectionTitle";
 
-// a row that loads its own posters, used on home
-export default function Row({ title, load }) {
+// a row that loads its own posters
+export default function Row({ load, ...titleProps }) {
   const { data, error } = useFetch(load);
   if (error) return null;
-  return <PosterRow title={title} items={data} />;
+  return <PosterRow {...titleProps} items={data} />;
 }
 
 // a title and a list of posters you can scroll sideways
 // items = null means it's still loading
-export function PosterRow({ title, items }) {
+export function PosterRow({ label, title, note, items }) {
   const listRef = useRef(null);
 
   function scroll(direction) {
@@ -23,8 +24,7 @@ export function PosterRow({ title, items }) {
 
   return (
     <section className="mt-10">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold">{title}</h2>
+      <SectionTitle label={label} title={title} note={note}>
         <div className="hidden gap-2 md:flex">
           <button onClick={() => scroll(-1)} className="rounded-full bg-panel-light p-1.5 text-muted hover:text-text">
             <ChevronLeft size={18} />
@@ -33,7 +33,7 @@ export function PosterRow({ title, items }) {
             <ChevronRight size={18} />
           </button>
         </div>
-      </div>
+      </SectionTitle>
 
       <div ref={listRef} className="no-scrollbar flex snap-x gap-4 overflow-x-auto">
         {!items && [1, 2, 3, 4, 5, 6, 7].map((n) => (
