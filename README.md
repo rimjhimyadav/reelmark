@@ -8,15 +8,15 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 
 ## Features
 
-- **Home** with what's trending today, a "continue watching" row, and a **what should I watch tonight?** picker that chooses from your Plan to watch list by mood and time
-- **Explore** by streaming app in India (Netflix, Prime Video, JioHotstar...), top 10 today, moods, genres, hidden gems and decades, plus a "see all" grid with filters and infinite scroll
+- **Home** is all about you: continue watching, new episodes from your shows this week, "because you watched..." picks, and a **what should I watch tonight?** picker that chooses from your Plan to watch list by mood and time. The banner on top shows each title's real logo
+- **Explore** has a row that changes with the month (spooky in October, cozy in December...), the newest trailers, top 10 today, coming soon with a countdown, streaming apps in India (Netflix, Prime Video, JioHotstar...), moods, genres, hidden gems and decades, plus a "see all" grid with filters and infinite scroll
 - **Search** everything at once, open it from anywhere with `Ctrl + K`
-- **Details page** with trailer, cast, where to watch in India and similar titles
+- **Details page** with trailer, cast, reviews, where to watch in India, an IMDb link and similar titles
 - **Track** anything as Watching, Plan to watch, Completed, On hold, Dropped or Rewatching (each with its own color), and rate it out of 5
 - **Episode tracking** per season. A show moves to Completed by itself when you finish the last episode
 - **Spoiler mode** blurs names and pictures of episodes you haven't seen
 - **Up Next** shows the next episode of every show you're watching, sorted how you like, with how many episodes and hours are left
-- **Calendar** with new episodes and movie releases from your library
+- **Calendar** with new episodes and movie releases from your library, click a day to see just that day
 - **Stats**: total watch time, streaks, a 12 month activity heatmap, hours per month and top genres
 - **Wrapped**: a "your year in watching" card you can download as a picture
 - **Settings**: spoiler mode, and export or import your library (it's all saved in your browser)
@@ -29,6 +29,10 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 | --- | --- |
 | ![Library](screenshots/library.jpg) | ![Stats](screenshots/stats.jpg) |
 
+| Explore |
+| --- |
+| ![Explore](screenshots/explore.jpg) |
+
 ## Built with
 
 - React + Vite
@@ -38,13 +42,6 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 - Vitest for the tracking and stats logic
 - html-to-image for the wrapped picture
 - [TMDB API](https://developer.themoviedb.org/docs) for all movie and show data
-
-## Some things I had to figure out
-
-- **Anime isn't a type on TMDB.** Anime here means Japanese animation (genre 16 + language `ja`), without kids shows.
-- **Working out the next episode.** TMDB tells you the last episode that aired, so `src/progress.js` builds the list of aired episodes from that and finds the first one you haven't watched. This also handles skipped episodes and new seasons coming out.
-- **api.themoviedb.org is blocked on Jio** (and some other Indian internet providers), so the app uses `api.tmdb.org`, which is the same API on a different domain.
-- **Movies and shows have different field names** (`title` vs `name`, `release_date` vs `first_air_date`), so every result is turned into the same shape in `src/api/tmdb.js` before the rest of the app sees it.
 
 ## Run it locally
 
