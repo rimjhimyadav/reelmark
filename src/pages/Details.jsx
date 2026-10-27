@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Play, Star } from "lucide-react";
 import { getDetails, imageUrl } from "../api/tmdb";
@@ -8,6 +8,7 @@ import { itemKey, useLibrary } from "../store/library";
 import Modal from "../components/Modal";
 import StarRating from "../components/StarRating";
 import TrackButton from "../components/TrackButton";
+import Episodes from "../components/Episodes";
 import { PosterRow } from "../components/Row";
 
 // the same page is used for /movie/123 and /tv/456
@@ -21,6 +22,19 @@ function Details({ type, id }) {
   const loadDetails = useCallback(() => getDetails(type, id), [type, id]);
   const { data: item, error } = useFetch(loadDetails);
   const [showTrailer, setShowTrailer] = useState(false);
+  const updateShowInfo = useLibrary((state) => state.updateShowInfo);
+
+  // if you track this show, save the newest season info (a new season may be out)
+  useEffect(() => {
+    if (item && item.type === "tv") {
+      updateShowInfo(itemKey(item.type, item.id), {
+        seasons: item.seasons,
+        lastAired: item.lastAired,
+        nextAir: item.nextAir,
+        ended: item.ended,
+      });
+    }
+  }, [item, updateShowInfo]);
 
   if (error) {
     return <p className="mt-20 text-center text-muted">Couldn't load this title. Maybe the link is wrong?</p>;
@@ -99,7 +113,7 @@ function Details({ type, id }) {
 
       <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_300px]">
         <div className="min-w-0">
-          {item.seasons.length > 0 && <Seasons seasons={item.seasons} />}
+          {item.seasons.length > 0 && <Episodes item={item} />}
           {item.cast.length > 0 && <Cast cast={item.cast} />}
         </div>
         <WhereToWatch providers={item.streaming} link={item.watchLink} />
@@ -134,32 +148,6 @@ function MyRating({ item }) {
       <span className="text-sm text-muted">Your rating</span>
       <StarRating value={saved.rating} onChange={(rating) => setRating(key, rating)} />
     </div>
-  );
-}
-
-function Seasons({ seasons }) {
-  return (
-    <section className="mb-10">
-      <h2 className="mb-4 text-xl font-bold">Seasons</h2>
-      <div className="flex flex-col gap-3">
-        {seasons.map((season) => (
-          <div key={season.id} className="flex items-center gap-4 rounded-xl bg-panel p-3">
-            <div className="h-20 w-14 shrink-0 overflow-hidden rounded-md bg-panel-light">
-              {season.poster_path && (
-                <img src={imageUrl(season.poster_path, "w185")} alt="" loading="lazy" className="size-full object-cover" />
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold">{season.name}</h3>
-              <p className="text-sm text-muted">
-                {plural(season.episode_count, "episode")}
-                {season.air_date && ` · ${season.air_date.slice(0, 4)}`}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 

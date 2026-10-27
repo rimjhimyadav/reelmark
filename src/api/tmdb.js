@@ -146,6 +146,47 @@ export async function search(query) {
   return toItems(data);
 }
 
+// the parts of a show we need for episode tracking
+function showInfo(data) {
+  const last = data.last_episode_to_air;
+  const next = data.next_episode_to_air;
+
+  return {
+    // season 0 is "specials", we skip it
+    seasons: data.seasons
+      .filter((season) => season.season_number > 0)
+      .map((season) => ({
+        number: season.season_number,
+        name: season.name,
+        episodes: season.episode_count,
+        poster: season.poster_path,
+        airDate: season.air_date,
+      })),
+    lastAired: last ? { season: last.season_number, episode: last.episode_number } : null,
+    nextAir: next ? { season: next.season_number, episode: next.episode_number, date: next.air_date } : null,
+    ended: data.status === "Ended" || data.status === "Canceled",
+  };
+}
+
+// fresh episode info for a show you already track (used by up next)
+export async function getShowInfo(id) {
+  const data = await get(`/tv/${id}`);
+  return showInfo(data);
+}
+
+// all episodes of one season
+export async function getSeason(showId, seasonNumber) {
+  const data = await get(`/tv/${showId}/season/${seasonNumber}`);
+  return data.episodes.map((episode) => ({
+    number: episode.episode_number,
+    name: episode.name,
+    airDate: episode.air_date,
+    runtime: episode.runtime,
+    still: episode.still_path,
+    overview: episode.overview,
+  }));
+}
+
 // everything for the details page in one request
 // (append_to_response lets us get cast, videos etc. together with the main info)
 export async function getDetails(type, id) {
@@ -176,9 +217,8 @@ export async function getDetails(type, id) {
     // movies have one runtime, shows have a runtime per episode
     runtime: type === "movie" ? data.runtime : data.episode_run_time[0],
     status: data.status,
-    // season 0 is "specials", we skip it for now
-    seasons: type === "tv" ? data.seasons.filter((season) => season.season_number > 0) : [],
     episodeCount: type === "tv" ? data.number_of_episodes : 0,
+    ...(type === "tv" ? showInfo(data) : { seasons: [] }),
     cast: data[creditsName].cast.slice(0, 15).map((person) => ({
       id: person.id,
       name: person.name,

@@ -12,3 +12,14 @@ export function formatRuntime(minutes) {
 export function plural(count, word) {
   return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
+
+// today as "2026-10-27" in your own timezone (same format TMDB uses for dates)
+export function todayString() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+// "2026-11-03" -> "3 Nov 2026"
+export function formatDate(dateString) {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
