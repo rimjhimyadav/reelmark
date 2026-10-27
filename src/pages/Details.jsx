@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { Play, Star } from "lucide-react";
+import { ExternalLink, Play, Star } from "lucide-react";
 import { getDetails, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
-import { formatRuntime, plural } from "../utils";
+import { formatDate, formatRuntime, plural } from "../utils";
 import { itemKey, useLibrary } from "../store/library";
 import StarRating from "../components/StarRating";
 import TrailerModal from "../components/TrailerModal";
@@ -107,6 +107,16 @@ function Details({ type, id }) {
                 <Play size={18} className="fill-current" /> Trailer
               </button>
             )}
+            {item.imdbId && (
+              <a
+                href={`https://www.imdb.com/title/${item.imdbId}/`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-panel-light px-5 py-2.5 font-semibold hover:bg-line"
+              >
+                IMDb <ExternalLink size={16} className="text-muted" />
+              </a>
+            )}
           </div>
 
           <MyRating item={item} />
@@ -117,6 +127,7 @@ function Details({ type, id }) {
         <div className="min-w-0">
           {item.seasons.length > 0 && <Episodes item={item} />}
           {item.cast.length > 0 && <Cast cast={item.cast} />}
+          {item.reviews.length > 0 && <Reviews reviews={item.reviews} />}
         </div>
         <WhereToWatch providers={item.streaming} link={item.watchLink} />
       </div>
@@ -163,6 +174,55 @@ function Cast({ cast }) {
         ))}
       </div>
     </section>
+  );
+}
+
+function Reviews({ reviews }) {
+  return (
+    <section className="mt-10">
+      <SectionTitle label="Reviews" title="What people are saying" note="Reviews from TMDB users." />
+      <div className="flex flex-col gap-3">
+        {reviews.map((review) => (
+          <Review key={review.id} review={review} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// long reviews are cut after a few lines until you click "read more"
+function Review({ review }) {
+  const [open, setOpen] = useState(false);
+  const isLong = review.text.length > 400;
+
+  return (
+    <article className="rounded-2xl bg-panel p-5">
+      <div className="flex items-center gap-3">
+        {/* first letter of the name as a little avatar */}
+        <span className="flex size-9 items-center justify-center rounded-full bg-accent font-bold text-accent-text uppercase">
+          {review.author[0]}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{review.author}</p>
+          <p className="text-xs text-muted">{formatDate(review.date)}</p>
+        </div>
+        {review.rating && (
+          <span className="ml-auto flex items-center gap-1 text-sm font-semibold">
+            <Star size={14} className="fill-yellow-400 text-yellow-400" />
+            {review.rating}/10
+          </span>
+        )}
+      </div>
+
+      <p className={`mt-3 text-sm leading-relaxed whitespace-pre-line text-text/85 ${open ? "" : "line-clamp-4"}`}>
+        {review.text}
+      </p>
+      {isLong && (
+        <button onClick={() => setOpen(!open)} className="mt-2 text-sm font-semibold text-accent hover:underline">
+          {open ? "Show less" : "Read more"}
+        </button>
+      )}
+    </article>
   );
 }
 
