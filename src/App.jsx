@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router";
+import { useEffect } from "react";
+import { Route, Routes, useNavigate } from "react-router";
 import Sidebar from "./components/Sidebar";
 import MobileNav from "./components/MobileNav";
 import Home from "./pages/Home";
@@ -11,6 +12,20 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
+  const navigate = useNavigate();
+
+  // ctrl + k (or cmd + k on mac) opens search from any page
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "k") {
+        event.preventDefault(); // the browser uses ctrl + k for its own search bar
+        navigate("/search");
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
+
   return (
     <>
       <Sidebar />

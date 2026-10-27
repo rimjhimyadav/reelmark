@@ -139,3 +139,9 @@ export async function getGenres(type) {
   }
   return data.genres;
 }
+
+// one search for movies, shows and anime together
+export async function search(query) {
+  const data = await get("/search/multi", { query, include_adult: false });
+  return toItems(data);
+}

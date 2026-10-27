@@ -21,6 +21,9 @@ export default function Sidebar() {
           >
             <link.icon size={20} />
             {link.label}
+            {link.to === "/search" && (
+              <kbd className="ml-auto rounded border border-line px-1.5 text-xs text-muted">Ctrl K</kbd>
+            )}
           </NavLink>
         ))}
       </nav>
