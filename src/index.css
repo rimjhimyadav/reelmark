@@ -21,3 +21,17 @@ body {
   background-color: var(--color-page);
   color: var(--color-text);
 }
+
+/* for sideways rows: still scrolls, but hides the ugly scrollbar */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}

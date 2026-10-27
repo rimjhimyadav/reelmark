@@ -26,6 +26,63 @@ export function imageUrl(path, size = "w500") {
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
-export function getTrending() {
-  return get("/trending/all/week");
+// movies and shows come back with different field names (title vs name),
+// so we turn both into the same simple shape that the rest of the app uses
+function toItem(result, type) {
+  const mediaType = type || result.media_type;
+  const date = mediaType === "movie" ? result.release_date : result.first_air_date;
+
+  return {
+    id: result.id,
+    type: mediaType,
+    title: mediaType === "movie" ? result.title : result.name,
+    year: date ? date.slice(0, 4) : "",
+    date: date || "",
+    rating: result.vote_average ? result.vote_average.toFixed(1) : null,
+    overview: result.overview,
+    poster: result.poster_path,
+    backdrop: result.backdrop_path,
+    genreIds: result.genre_ids || [],
+  };
+}
+
+function toItems(data, type) {
+  return data.results.filter((result) => result.media_type !== "person").map((result) => toItem(result, type));
+}
+
+export async function getTrending() {
+  const data = await get("/trending/all/day");
+  return toItems(data);
+}
+
+export async function getTrendingMovies() {
+  const data = await get("/trending/movie/week");
+  return toItems(data, "movie");
+}
+
+export async function getTrendingShows() {
+  const data = await get("/trending/tv/day");
+  return toItems(data, "tv");
+}
+
+// TMDB has no "anime" category, so we ask for japanese animation (genre 16)
+export async function getPopularAnime() {
+  const data = await get("/discover/tv", {
+    with_genres: 16,
+    with_original_language: "ja",
+    without_genres: 10762, // skip kids shows like doraemon
+    sort_by: "popularity.desc",
+  });
+  return toItems(data, "tv");
+}
+
+export async function getUpcomingMovies() {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = await get("/discover/movie", {
+    "release_date.gte": today,
+    sort_by: "popularity.desc",
+    region: "IN",
+    with_release_type: "2|3", // 2 = in theaters, 3 = wide release
+  });
+  return toItems(data, "movie");
 }
