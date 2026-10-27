@@ -99,8 +99,10 @@ const SORT_PARAMS = {
   new: { sort_by: "date.desc", "vote_count.gte": 20 },
 };
 
-// used by the explore page: one page of movies, shows or anime
-export async function discover({ type, sort, genre, page }) {
+// used by the explore "see all" page: one page of movies, shows or anime
+// genre can be one id ("35") or a few ("35,10751" = has all of them)
+// provider is a streaming service id, decade is like 1990
+export async function discover({ type, sort, genre, provider, decade, page }) {
   const apiType = type === "movie" ? "movie" : "tv";
   const dateField = apiType === "movie" ? "primary_release_date" : "first_air_date";
   const today = new Date().toISOString().slice(0, 10);
@@ -118,7 +120,18 @@ export async function discover({ type, sort, genre, page }) {
     params.without_genres = KIDS;
   }
   if (genre) genres.push(genre);
-  if (genres.length > 0) params.with_genres = genres.join(","); // comma means "has all of these"
+  if (genres.length > 0) params.with_genres = genres.join(",");
+
+  if (provider) {
+    params.with_watch_providers = provider;
+    params.watch_region = "IN";
+    params.with_watch_monetization_types = "flatrate"; // part of the subscription, not rent or buy
+  }
+
+  if (decade) {
+    params[dateField + ".gte"] = `${decade}-01-01`;
+    params[dateField + ".lte"] = `${Number(decade) + 9}-12-31`;
+  }
 
   const data = await get(`/discover/${apiType}`, params);
   return {
@@ -126,6 +139,37 @@ export async function discover({ type, sort, genre, page }) {
     // TMDB never gives more than 500 pages
     hasMore: page < Math.min(data.total_pages, 500),
   };
+}
+
+// streaming services we show on explore, in the order we want them
+const PROVIDER_IDS = [8, 119, 2336, 350, 283, 232, 237, 11]; // netflix, prime, jiohotstar, apple tv, crunchyroll, zee5, sony liv, mubi
+
+export async function getProviders() {
+  const data = await get("/watch/providers/movie", { watch_region: "IN" });
+  const providers = [];
+  for (const id of PROVIDER_IDS) {
+    const provider = data.results.find((p) => p.provider_id === id);
+    if (provider) providers.push({ id, name: provider.provider_name, logo: provider.logo_path });
+  }
+  return providers;
+}
+
+// well rated movies that not many people have voted on
+export async function getHiddenGems() {
+  const data = await get("/discover/movie", {
+    sort_by: "vote_average.desc",
+    "vote_average.gte": 7.5,
+    "vote_count.gte": 300,
+    "vote_count.lte": 2000,
+    // brand new movies get a lot of 10/10 votes from fans in the first weeks, so skip the last year
+    "primary_release_date.lte": `${new Date().getFullYear() - 1}-01-01`,
+  });
+  return toItems(data, "movie");
+}
+
+export async function getTopTen() {
+  const data = await get("/trending/all/day");
+  return toItems(data).slice(0, 10);
 }
 
 export async function getGenres(type) {

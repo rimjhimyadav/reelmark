@@ -6,6 +6,7 @@ import { useSettings } from "./store/settings";
 import { applyAccent } from "./accents";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
+import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import DetailsPage from "./pages/Details";
 import Library from "./pages/Library";
@@ -55,6 +56,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/explore/all" element={<Browse />} />
           <Route path="/search" element={<Search />} />
           <Route path="/movie/:id" element={<DetailsPage type="movie" />} />
           <Route path="/tv/:id" element={<DetailsPage type="tv" />} />

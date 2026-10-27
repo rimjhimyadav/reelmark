@@ -1,182 +1,189 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router";
-import { discover, getGenres } from "../api/tmdb";
+import { Link } from "react-router";
+import { ArrowRight, Brain, Clapperboard, Ghost, Heart, Mountain, Smile, Sparkles, Tv, Zap } from "lucide-react";
+import { getGenres, getHiddenGems, getProviders, getTopTen, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
-import PosterCard, { PosterSkeleton } from "../components/PosterCard";
+import Row from "../components/Row";
+
+// "see all" links go to the browse page with filters in the url
+function browseLink(filters) {
+  return "/explore/all?" + new URLSearchParams(filters).toString();
+}
 
 const TYPES = [
-  { key: "movie", label: "Movies" },
-  { key: "tv", label: "Shows" },
-  { key: "anime", label: "Anime" },
+  { label: "Movies", icon: Clapperboard, filters: { type: "movie" } },
+  { label: "Shows", icon: Tv, filters: { type: "tv" } },
+  { label: "Anime", icon: Sparkles, filters: { type: "anime" } },
 ];
 
-const SORTS = [
-  { key: "popular", label: "Popular" },
-  { key: "top", label: "Top rated" },
-  { key: "new", label: "Newest" },
+// moods are just genre mixes. a comma means "has all of these genres"
+const MOODS = [
+  { name: "Feel-good", genre: "35,10751", icon: Smile, color: "from-yellow-500/40" },
+  { name: "Mind-bending", genre: "878,9648", icon: Brain, color: "from-violet-500/40" },
+  { name: "Edge of your seat", genre: "53", icon: Zap, color: "from-red-500/40" },
+  { name: "Date night", genre: "10749,35", icon: Heart, color: "from-pink-500/40" },
+  { name: "Can't sleep after this", genre: "27", icon: Ghost, color: "from-slate-400/40" },
+  { name: "Epic adventures", genre: "12,14", icon: Mountain, color: "from-emerald-500/40" },
+];
+
+const DECADES = ["1970", "1980", "1990", "2000", "2010", "2020"];
+
+// background colors for the genre tiles, they just repeat
+const GENRE_COLORS = [
+  "from-sky-600/50",
+  "from-orange-600/50",
+  "from-emerald-600/50",
+  "from-fuchsia-600/50",
+  "from-amber-600/50",
+  "from-rose-600/50",
+  "from-teal-600/50",
+  "from-indigo-600/50",
 ];
 
 export default function Explore() {
-  // filters live in the url (like /explore?type=anime&sort=top) so you can share the link
-  const [searchParams, setSearchParams] = useSearchParams();
-  const type = searchParams.get("type") || "movie";
-  const sort = searchParams.get("sort") || "popular";
-  const genre = searchParams.get("genre") || "";
-
-  function changeFilter(name, value) {
-    const params = { type, sort, genre };
-    params[name] = value;
-    if (name === "type") params.genre = ""; // movie and tv genres are different
-    if (!params.genre) delete params.genre;
-    setSearchParams(params);
-  }
-
   return (
     <>
       <PageTitle title="Explore" text="Find something new to watch." />
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex rounded-xl bg-panel p-1">
-          {TYPES.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => changeFilter("type", item.key)}
-              className={`rounded-lg px-5 py-2 font-semibold transition-colors ${
-                type === item.key ? "bg-accent text-accent-text" : "text-muted hover:text-text"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-1">
-          {SORTS.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => changeFilter("sort", item.key)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                sort === item.key ? "bg-panel-light text-text" : "text-muted hover:text-text"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <GenreChips type={type} genre={genre} onChange={(id) => changeFilter("genre", id)} />
-
-      {/* a new key = a brand new Results, so the list starts from page 1 again */}
-      <Results key={type + sort + genre} type={type} sort={sort} genre={genre} />
-    </>
-  );
-}
-
-function GenreChips({ type, genre, onChange }) {
-  const loadGenres = useCallback(() => getGenres(type), [type]);
-  const { data: genres } = useFetch(loadGenres);
-  if (!genres) return <div className="h-14" />;
-
-  return (
-    <div className="no-scrollbar mt-5 flex gap-2 overflow-x-auto pb-1">
-      <Chip active={genre === ""} onClick={() => onChange("")}>
-        All
-      </Chip>
-      {genres.map((item) => (
-        <Chip key={item.id} active={genre === String(item.id)} onClick={() => onChange(String(item.id))}>
-          {item.name}
-        </Chip>
-      ))}
-    </div>
-  );
-}
-
-function Chip({ active, onClick, children }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`shrink-0 rounded-full border px-4 py-1.5 text-sm whitespace-nowrap transition-colors ${
-        active ? "border-text bg-text text-page" : "border-line text-muted hover:border-muted hover:text-text"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function Results({ type, sort, genre }) {
-  const [items, setItems] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const bottomRef = useRef(null);
-
-  // load a page every time "page" goes up
-  useEffect(() => {
-    let ignore = false;
-
-    discover({ type, sort, genre, page })
-      .then((result) => {
-        if (ignore) return;
-        // popular lists change while you scroll, so a title can come back on the next page
-        setItems((oldItems) => {
-          const oldIds = oldItems.map((item) => item.id);
-          const newItems = result.items.filter((item) => !oldIds.includes(item.id));
-          return [...oldItems, ...newItems];
-        });
-        setHasMore(result.hasMore);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (ignore) return;
-        setError(true);
-        setLoading(false);
-      });
-
-    return () => {
-      ignore = true;
-    };
-  }, [type, sort, genre, page]);
-
-  // infinite scroll: when the empty div under the grid gets close to the screen, load the next page
-  useEffect(() => {
-    if (loading || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setLoading(true);
-          setPage(page + 1);
-        }
-      },
-      { rootMargin: "600px" }
-    );
-    observer.observe(bottomRef.current);
-    return () => observer.disconnect();
-  }, [loading, hasMore, page]);
-
-  if (!loading && items.length === 0) {
-    return (
-      <p className="mt-16 text-center text-muted">
-        {error ? "Couldn't load this list, try again in a bit." : "Nothing found here."}
-      </p>
-    );
-  }
-
-  return (
-    <>
-      <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
-        {items.map((item) => (
-          <PosterCard key={item.id} item={item} />
+      <div className="grid grid-cols-3 gap-3">
+        {TYPES.map((item) => (
+          <Link
+            key={item.label}
+            to={browseLink(item.filters)}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-panel py-5 font-bold transition-colors hover:bg-panel-light md:justify-start md:px-6"
+          >
+            <item.icon size={22} /> {item.label}
+            <ArrowRight size={18} className="ml-auto hidden text-muted md:block" />
+          </Link>
         ))}
-        {loading && [1, 2, 3, 4, 5, 6].map((n) => <PosterSkeleton key={n} />)}
       </div>
 
-      <div ref={bottomRef} />
-      {error && items.length > 0 && <p className="mt-8 text-center text-muted">Couldn't load more.</p>}
+      <Providers />
+      <TopTen />
+
+      <Section title="Pick a mood">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          {MOODS.map((mood) => (
+            <Link
+              key={mood.name}
+              to={browseLink({ type: "movie", genre: mood.genre, name: mood.name })}
+              className={`flex items-center gap-3 rounded-2xl bg-linear-to-br ${mood.color} to-panel p-5 font-bold transition-transform hover:scale-[1.02]`}
+            >
+              <mood.icon size={24} />
+              {mood.name}
+            </Link>
+          ))}
+        </div>
+      </Section>
+
+      <Row title="Hidden gems" load={getHiddenGems} />
+
+      <GenreTiles />
+
+      <Section title="By decade">
+        <div className="no-scrollbar flex gap-3 overflow-x-auto">
+          {DECADES.map((decade) => (
+            <Link
+              key={decade}
+              to={browseLink({ type: "movie", decade, sort: "top", name: `Best of the ${decade}s` })}
+              className="shrink-0 rounded-2xl border border-line px-8 py-6 text-2xl font-extrabold text-muted transition-colors hover:border-text hover:text-text"
+            >
+              {decade.slice(2)}s
+            </Link>
+          ))}
+        </div>
+      </Section>
     </>
   );
+}
+
+function Section({ title, children }) {
+  return (
+    <section className="mt-10">
+      <h2 className="mb-4 text-xl font-bold">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function Providers() {
+  const { data: providers } = useFetch(getProviders);
+  if (!providers) return null;
+
+  return (
+    <Section title="What's on your apps">
+      <div className="grid grid-cols-4 gap-3 md:grid-cols-8">
+        {providers.map((provider) => (
+          <Link
+            key={provider.id}
+            to={browseLink({ type: "movie", provider: provider.id, name: `On ${provider.name}` })}
+            className="group flex flex-col items-center gap-2 text-center"
+          >
+            <img
+              src={imageUrl(provider.logo, "w154")}
+              alt=""
+              className="aspect-square w-full max-w-20 rounded-2xl transition-transform group-hover:scale-105"
+            />
+            <span className="text-xs text-muted group-hover:text-text">{provider.name}</span>
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// trending today with a big number next to each poster
+function TopTen() {
+  const { data: items } = useFetch(getTopTen);
+  if (!items) return null;
+
+  return (
+    <Section title="Top 10 today">
+      <div className="no-scrollbar flex gap-2 overflow-x-auto">
+        {items.map((item, index) => (
+          <Link key={item.id} to={`/${item.type}/${item.id}`} className="group flex shrink-0 items-end">
+            {/* outlined number, the text color is the page color so only the stroke shows */}
+            <span
+              className="-mr-4 text-8xl leading-none font-black text-page md:text-9xl"
+              style={{ WebkitTextStroke: "2px var(--color-muted)" }}
+            >
+              {index + 1}
+            </span>
+            <img
+              src={imageUrl(item.poster, "w342")}
+              alt={item.title}
+              loading="lazy"
+              className="relative w-28 rounded-xl transition-transform group-hover:scale-105 md:w-36"
+            />
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function GenreTiles() {
+  const { data: genres } = useFetch(getMovieGenres);
+  if (!genres) return null;
+
+  return (
+    <Section title="Genres">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {genres.map((genre, index) => (
+          <Link
+            key={genre.id}
+            to={browseLink({ type: "movie", genre: genre.id, name: genre.name })}
+            className={`rounded-xl bg-linear-to-br ${GENRE_COLORS[index % GENRE_COLORS.length]} to-panel px-4 py-5 font-bold transition-transform hover:scale-[1.02]`}
+          >
+            {genre.name}
+          </Link>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// useFetch needs a function that stays the same, so this lives outside the component
+function getMovieGenres() {
+  return getGenres("movie");
 }
