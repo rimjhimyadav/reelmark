@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Info, Star } from "lucide-react";
-import { getTrending, imageUrl } from "../api/tmdb";
+import { getLogo, getTrending, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 
 // big banner on top of home, shows what's trending today
@@ -42,7 +42,8 @@ export default function Hero() {
 
       <div className="absolute inset-x-0 bottom-0 p-5 md:p-10">
         <p className="text-xs font-semibold tracking-widest text-muted uppercase">#{current + 1} trending today</p>
-        <h1 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">{item.title}</h1>
+        {/* key: start fresh for every slide, so we never show the logo of the last one */}
+        <HeroTitle key={item.type + item.id} item={item} />
 
         <div className="mt-3 flex items-center gap-3 text-sm text-muted">
           {item.rating && (
@@ -80,4 +81,27 @@ export default function Hero() {
       </div>
     </section>
   );
+}
+
+// the title logo if TMDB has one, otherwise the name as text
+function HeroTitle({ item }) {
+  const loadLogo = useCallback(() => getLogo(item.type, item.id), [item.type, item.id]);
+  const { data: logo, error } = useFetch(loadLogo);
+
+  // keep the space empty for a moment instead of showing the text and then swapping it
+  if (logo === null && !error) return <div className="mt-2 h-16 md:h-28" />;
+
+  if (logo) {
+    return (
+      <h1 className="mt-2">
+        <img
+          src={imageUrl(logo, "w500")}
+          alt={item.title}
+          className="h-16 max-w-[70%] animate-[fade_0.6s] object-contain object-left md:h-28 md:max-w-md"
+        />
+      </h1>
+    );
+  }
+
+  return <h1 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">{item.title}</h1>;
 }

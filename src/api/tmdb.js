@@ -226,6 +226,22 @@ export async function search(query) {
   return toItems(data);
 }
 
+// the official title logo (the stylish text from the poster)
+// gives back "" if there isn't one (not null, because useFetch treats null as "still loading")
+// we remember logos we already got, so the home banner doesn't ask again when it loops
+const savedLogos = {};
+
+export async function getLogo(type, id) {
+  const key = type + id;
+  if (key in savedLogos) return savedLogos[key];
+
+  // "null" = logos with no language, they usually have no text that needs translating
+  const data = await get(`/${type}/${id}/images`, { include_image_language: "en,null" });
+  const logo = data.logos.find((image) => image.iso_639_1 === "en") || data.logos[0];
+  savedLogos[key] = logo ? logo.file_path : "";
+  return savedLogos[key];
+}
+
 // the parts of a show we need for episode tracking
 function showInfo(data) {
   const last = data.last_episode_to_air;
@@ -273,7 +289,7 @@ export async function getDetails(type, id) {
   // for shows, "credits" only has the latest season, "aggregate_credits" has everyone
   const creditsName = type === "movie" ? "credits" : "aggregate_credits";
   const data = await get(`/${type}/${id}`, {
-    append_to_response: `${creditsName},videos,watch/providers,recommendations`,
+    append_to_response: `${creditsName},videos,watch/providers,recommendations,reviews,external_ids`,
   });
 
   const item = toItem(data, type);
@@ -305,5 +321,13 @@ export async function getDetails(type, id) {
     streaming: providersInIndia && providersInIndia.flatrate ? providersInIndia.flatrate : [],
     watchLink: providersInIndia ? providersInIndia.link : null,
     recommendations: toItems(data.recommendations, type),
+    reviews: data.reviews.results.slice(0, 3).map((review) => ({
+      id: review.id,
+      author: review.author,
+      rating: review.author_details.rating, // out of 10, can be empty
+      text: review.content,
+      date: review.created_at,
+    })),
+    imdbId: data.external_ids.imdb_id,
   };
 }
