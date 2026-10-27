@@ -4,13 +4,13 @@
 @theme {
   --font-sans: "Inter Variable", system-ui, sans-serif;
 
-  --color-page: #0e0f13;
-  --color-panel: #16181d;
-  --color-panel-light: #1e2128;
-  --color-line: #262a33;
+  --color-page: #0a0e1f;
+  --color-panel: #11172e;
+  --color-panel-light: #19213f;
+  --color-line: #252e52;
 
   --color-text: #f4f4f5;
-  --color-muted: #9097a3;
+  --color-muted: #8f98ba;
 
   /* main color (violet), and the text color that sits on top of it */
   --color-accent: #7c5cff;
@@ -20,6 +20,11 @@
 body {
   background-color: var(--color-page);
   color: var(--color-text);
+  /* a soft violet glow at the top so the page isn't flat black */
+  background-image:
+    radial-gradient(900px 500px at 15% -10%, rgb(124 92 255 / 0.16), transparent 70%),
+    radial-gradient(700px 400px at 100% 0%, rgb(124 92 255 / 0.08), transparent 70%);
+  background-attachment: fixed;
 }
 
 /* for sideways rows: still scrolls, but hides the ugly scrollbar */
