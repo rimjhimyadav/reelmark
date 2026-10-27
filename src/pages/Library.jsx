@@ -147,7 +147,9 @@ export default function Library() {
       {shown.length === 0 && <p className="mt-16 text-center text-muted">Nothing matches these filters.</p>}
 
       {view === "grid" ? (
-        <div className="mt-6 grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
+        // auto-fill: as many columns as fit, each at least 110px (150px on bigger screens),
+        // so the tiles stay the same small size on any screen
+        <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-x-3 gap-y-5 sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))]">
           {shown.map((item) => (
             <GridCard key={item.type + item.id} item={item} />
           ))}
