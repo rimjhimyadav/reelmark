@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
 import Row from "../components/Row";
 import SectionTitle from "../components/SectionTitle";
+import TrailerRow from "../components/TrailerRow";
 
 // "see all" links go to the browse page with filters in the url
 function browseLink(filters) {
@@ -61,6 +62,7 @@ export default function Explore() {
       </div>
 
       <TopTen />
+      <TrailerRow />
       <Row
         label="Coming soon"
         title="New in theaters soon"

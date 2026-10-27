@@ -5,8 +5,8 @@ import { getDetails, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import { formatRuntime, plural } from "../utils";
 import { itemKey, useLibrary } from "../store/library";
-import Modal from "../components/Modal";
 import StarRating from "../components/StarRating";
+import TrailerModal from "../components/TrailerModal";
 import TrackButton from "../components/TrackButton";
 import Episodes from "../components/Episodes";
 import { PosterRow } from "../components/Row";
@@ -124,15 +124,7 @@ function Details({ type, id }) {
       {item.recommendations.length > 0 && <PosterRow label="Recommended" title="More like this" items={item.recommendations} />}
 
       {showTrailer && (
-        <Modal title={`${item.title} trailer`} wide onClose={() => setShowTrailer(false)}>
-          <iframe
-            src={`https://www.youtube.com/embed/${item.trailerKey}?autoplay=1`}
-            title="Trailer"
-            allow="autoplay; fullscreen"
-            allowFullScreen
-            className="aspect-video w-full rounded-lg"
-          />
-        </Modal>
+        <TrailerModal title={item.title} videoKey={item.trailerKey} onClose={() => setShowTrailer(false)} />
       )}
     </>
   );

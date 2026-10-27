@@ -91,6 +91,41 @@ export async function getUpcomingMovies() {
   return toItems(data, "movie");
 }
 
+// youtube trailer from a list of videos, prefer the official one
+function pickTrailer(videos) {
+  const youtubeVideos = videos.filter((video) => video.site === "YouTube");
+  return (
+    youtubeVideos.find((video) => video.type === "Trailer" && video.official) ||
+    youtubeVideos.find((video) => video.type === "Trailer") ||
+    youtubeVideos[0]
+  );
+}
+
+// TMDB has no "new trailers" list, so we take upcoming movies and ask for each one's videos
+export async function getLatestTrailers() {
+  const movies = await getUpcomingMovies();
+  const withTrailers = await Promise.all(
+    movies.slice(0, 12).map(async (movie) => {
+      const data = await get(`/movie/${movie.id}/videos`, { include_video_language: "en,hi" });
+      const trailer = pickTrailer(data.results);
+      return trailer ? { ...movie, trailerKey: trailer.key } : null;
+    }),
+  );
+  return withTrailers.filter((movie) => movie !== null);
+}
+
+// the "this month" row on explore, params come from seasons.js
+export async function getSeasonalMovies(params) {
+  const data = await get("/discover/movie", { "vote_count.gte": 500, ...params });
+  return toItems(data, "movie");
+}
+
+// "because you watched", TMDB picks titles that are similar
+export async function getRecommendations(type, id) {
+  const data = await get(`/${type}/${id}/recommendations`);
+  return toItems(data, type);
+}
+
 // sort options for the explore page
 const SORT_PARAMS = {
   popular: { sort_by: "popularity.desc" },
@@ -242,12 +277,7 @@ export async function getDetails(type, id) {
 
   const item = toItem(data, type);
 
-  // youtube trailer, prefer the official one
-  const youtubeVideos = data.videos.results.filter((video) => video.site === "YouTube");
-  const trailer =
-    youtubeVideos.find((video) => video.type === "Trailer" && video.official) ||
-    youtubeVideos.find((video) => video.type === "Trailer") ||
-    youtubeVideos[0];
+  const trailer = pickTrailer(data.videos.results);
 
   // where to watch in india. the data comes from JustWatch
   const providersInIndia = data["watch/providers"].results.IN;
