@@ -12,9 +12,9 @@
   --color-text: #f4f4f5;
   --color-muted: #9097a3;
 
-  /* main color. you can change it in settings, see accents.js */
-  --color-accent: #f4f4f5;
-  --color-accent-text: #0e0f13;
+  /* main color (a warm orange), and the text color that sits on top of it */
+  --color-accent: #ff7849;
+  --color-accent-text: #1a0f0a;
 }
 
 body {

@@ -19,7 +19,7 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 - **Calendar** with new episodes and movie releases from your library
 - **Stats**: total watch time, streaks, a 12 month activity heatmap, hours per month and top genres
 - **Wrapped**: a "your year in watching" card you can download as a picture
-- **Settings**: pick the main color, and export or import your library (it's all saved in your browser)
+- **Settings**: spoiler mode, and export or import your library (it's all saved in your browser)
 
 | Episodes | Up Next |
 | --- | --- |

@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Check, Download, Trash2, Upload } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
 import { useLibrary } from "../store/library";
 import { useSettings } from "../store/settings";
-import { ACCENTS } from "../accents";
 import { plural, todayString } from "../utils";
 import PageTitle from "../components/PageTitle";
 import Modal from "../components/Modal";
@@ -60,7 +59,6 @@ export default function Settings() {
     <>
       <PageTitle title="Settings" />
 
-      <AccentPicker />
       <SpoilerSetting />
 
       <section className="mt-4 max-w-2xl rounded-2xl bg-panel p-6">
@@ -147,40 +145,12 @@ export default function Settings() {
   );
 }
 
-function AccentPicker() {
-  const accent = useSettings((state) => state.accent);
-  const setAccent = useSettings((state) => state.setAccent);
-
-  return (
-    <section className="max-w-2xl rounded-2xl bg-panel p-6">
-      <h2 className="text-lg font-bold">Main color</h2>
-      <p className="mt-1 text-sm text-muted">Used for buttons, progress bars and charts.</p>
-
-      <div className="mt-5 flex flex-wrap gap-4">
-        {ACCENTS.map((item) => (
-          <button key={item.key} onClick={() => setAccent(item.key)} className="flex flex-col items-center gap-2">
-            <span
-              className={`flex size-12 items-center justify-center rounded-full ring-offset-4 ring-offset-panel ${
-                accent === item.key ? "ring-2 ring-text" : ""
-              }`}
-              style={{ backgroundColor: item.color, color: item.text }}
-            >
-              {accent === item.key && <Check size={20} strokeWidth={3} />}
-            </span>
-            <span className={`text-sm ${accent === item.key ? "font-semibold" : "text-muted"}`}>{item.label}</span>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function SpoilerSetting() {
   const hideSpoilers = useSettings((state) => state.hideSpoilers);
   const toggleSpoilers = useSettings((state) => state.toggleSpoilers);
 
   return (
-    <section className="mt-4 flex max-w-2xl items-center justify-between gap-6 rounded-2xl bg-panel p-6">
+    <section className="flex max-w-2xl items-center justify-between gap-6 rounded-2xl bg-panel p-6">
       <div>
         <h2 className="text-lg font-bold">Hide spoilers</h2>
         <p className="mt-1 text-sm text-muted">
