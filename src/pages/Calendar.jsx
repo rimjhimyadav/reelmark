@@ -2,19 +2,13 @@ import { Link } from "react-router";
 import { imageUrl } from "../api/tmdb";
 import { useLibrary } from "../store/library";
 import useRefreshShows from "../hooks/useRefreshShows";
-import { episodeLabel } from "../progress";
-import { todayString } from "../utils";
+import { airingShows, getUpcomingEvents } from "../upcoming";
+import { addDays, todayString } from "../utils";
 import PageTitle from "../components/PageTitle";
 
 // "2026-10-27" -> a date object at noon (noon so timezones can't move it to another day)
 function toDate(dateString) {
   return new Date(dateString + "T12:00:00");
-}
-
-function addDays(dateString, amount) {
-  const date = toDate(dateString);
-  date.setDate(date.getDate() + amount);
-  return date.toLocaleDateString("en-CA");
 }
 
 function dayTitle(dateString, today) {
@@ -27,26 +21,9 @@ export default function Calendar() {
   const items = Object.values(useLibrary((state) => state.items));
   const today = todayString();
 
-  // shows that are still airing, and movies you're waiting for
-  const shows = items.filter((item) => item.type === "tv" && !item.ended && item.status !== "dropped");
-  useRefreshShows(shows);
-
-  const events = [];
-  for (const show of shows) {
-    if (show.nextAir && show.nextAir.date >= today) {
-      events.push({
-        date: show.nextAir.date,
-        item: show,
-        text: episodeLabel(show.nextAir.season, show.nextAir.episode),
-      });
-    }
-  }
-  for (const movie of items.filter((item) => item.type === "movie")) {
-    if (movie.releaseDate && movie.releaseDate >= today) {
-      events.push({ date: movie.releaseDate, item: movie, text: "Movie release" });
-    }
-  }
-  events.sort((a, b) => a.date.localeCompare(b.date));
+  useRefreshShows(airingShows(items));
+  // dropped shows still have dates, but you don't care about them anymore
+  const events = getUpcomingEvents(items.filter((item) => item.status !== "dropped"), today);
 
   // the next 7 days for the strip on top
   const week = [];

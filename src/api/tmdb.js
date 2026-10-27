@@ -116,7 +116,8 @@ export async function getLatestTrailers() {
 
 // the "this month" row on explore, params come from seasons.js
 export async function getSeasonalMovies(params) {
-  const data = await get("/discover/movie", { "vote_count.gte": 500, ...params });
+  // only decent movies, popular ones can still have a 4/10 score
+  const data = await get("/discover/movie", { "vote_count.gte": 500, "vote_average.gte": 6.5, ...params });
   return toItems(data, "movie");
 }
 

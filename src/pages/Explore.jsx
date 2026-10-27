@@ -3,9 +3,12 @@ import { ArrowRight, Brain, Clapperboard, Ghost, Heart, Mountain, Smile, Sparkle
 import {
   getGenres,
   getHiddenGems,
+  getPopularAnime,
   getProviders,
   getSeasonalMovies,
   getTopTen,
+  getTrendingMovies,
+  getTrendingShows,
   getUpcomingMovies,
   imageUrl,
 } from "../api/tmdb";
@@ -73,12 +76,15 @@ export default function Explore() {
       <Row label={season.label} title={season.title} note={season.note} load={getThisSeason} />
       <TopTen />
       <TrailerRow />
+      <Row label="Trending" title="Movies everyone's watching" load={getTrendingMovies} />
+      <Row label="Trending" title="Popular shows today" load={getTrendingShows} />
       <Row
         label="Coming soon"
         title="New in theaters soon"
         note="Mark the ones you want to see."
         load={getComingSoon}
       />
+      <Row label="Anime" title="Popular anime right now" load={getPopularAnime} />
       <Providers />
 
       <Section label="Moods" title="What are you in the mood for?">

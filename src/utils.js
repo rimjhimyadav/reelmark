@@ -18,6 +18,13 @@ export function todayString() {
   return new Date().toLocaleDateString("en-CA");
 }
 
+// ("2026-10-27", 7) -> "2026-11-03"
+export function addDays(dateString, amount) {
+  const date = new Date(dateString + "T12:00:00"); // noon, so timezones can't move it to another day
+  date.setDate(date.getDate() + amount);
+  return date.toLocaleDateString("en-CA");
+}
+
 // "2026-11-03" -> "3 Nov 2026"
 export function formatDate(dateString) {
   if (!dateString) return "";
