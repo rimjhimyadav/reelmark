@@ -2,7 +2,8 @@
 // docs: https://developer.themoviedb.org/docs
 
 const API_KEY = import.meta.env.VITE_TMDB_KEY;
-const BASE_URL = "https://api.themoviedb.org/3";
+// api.tmdb.org is the same api, but some indian internet providers (like jio) block api.themoviedb.org
+const BASE_URL = "https://api.tmdb.org/3";
 
 async function get(path, params = {}) {
   const url = new URL(BASE_URL + path);
