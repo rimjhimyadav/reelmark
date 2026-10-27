@@ -7,6 +7,9 @@ export const useSettings = create(
     (set) => ({
       sidebarCollapsed: false,
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+      accent: "snow",
+      setAccent: (accent) => set({ accent }),
     }),
     { name: "reelmark-settings" }
   )

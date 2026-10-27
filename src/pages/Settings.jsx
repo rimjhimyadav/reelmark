@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Check, Download, Trash2, Upload } from "lucide-react";
 import { useLibrary } from "../store/library";
+import { useSettings } from "../store/settings";
+import { ACCENTS } from "../accents";
 import { plural, todayString } from "../utils";
 import PageTitle from "../components/PageTitle";
 import Modal from "../components/Modal";
@@ -58,7 +60,9 @@ export default function Settings() {
     <>
       <PageTitle title="Settings" />
 
-      <section className="max-w-2xl rounded-2xl bg-panel p-6">
+      <AccentPicker />
+
+      <section className="mt-4 max-w-2xl rounded-2xl bg-panel p-6">
         <h2 className="text-lg font-bold">Your library</h2>
         <p className="mt-1 text-sm text-muted">
           You have {plural(count, "title")}. Everything is saved in this browser only, so export a backup now and then.
@@ -139,5 +143,33 @@ export default function Settings() {
         </Modal>
       )}
     </>
+  );
+}
+
+function AccentPicker() {
+  const accent = useSettings((state) => state.accent);
+  const setAccent = useSettings((state) => state.setAccent);
+
+  return (
+    <section className="max-w-2xl rounded-2xl bg-panel p-6">
+      <h2 className="text-lg font-bold">Main color</h2>
+      <p className="mt-1 text-sm text-muted">Used for buttons, progress bars and charts.</p>
+
+      <div className="mt-5 flex flex-wrap gap-4">
+        {ACCENTS.map((item) => (
+          <button key={item.key} onClick={() => setAccent(item.key)} className="flex flex-col items-center gap-2">
+            <span
+              className={`flex size-12 items-center justify-center rounded-full ring-offset-4 ring-offset-panel ${
+                accent === item.key ? "ring-2 ring-text" : ""
+              }`}
+              style={{ backgroundColor: item.color, color: item.text }}
+            >
+              {accent === item.key && <Check size={20} strokeWidth={3} />}
+            </span>
+            <span className={`text-sm ${accent === item.key ? "font-semibold" : "text-muted"}`}>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -3,6 +3,7 @@ import { Route, Routes, useLocation, useNavigate } from "react-router";
 import Sidebar from "./components/Sidebar";
 import MobileNav from "./components/MobileNav";
 import { useSettings } from "./store/settings";
+import { applyAccent } from "./accents";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import Search from "./pages/Search";
@@ -17,6 +18,11 @@ export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const sidebarCollapsed = useSettings((state) => state.sidebarCollapsed);
+  const accent = useSettings((state) => state.accent);
+
+  useEffect(() => {
+    applyAccent(accent);
+  }, [accent]);
 
   // when you open a new page, start at the top (react router doesn't do this by itself)
   useEffect(() => {
