@@ -76,8 +76,9 @@ export default function UpNext() {
         </div>
       )}
 
+      {/* as many ~260px cards as fit in a row, so they don't get huge on big screens */}
       {ready.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
           {/* the key has the season in it, so the card starts fresh when you move to a new season */}
           {ready.map((show) => (
             <NextEpisodeCard key={show.id + "-" + getNextEpisode(show).season} show={show} />
@@ -137,7 +138,7 @@ function NextEpisodeCard({ show }) {
   const picture = episode && episode.still ? imageUrl(episode.still, "w780") : imageUrl(show.backdrop, "w780");
 
   return (
-    <div className="group relative aspect-video overflow-hidden rounded-2xl bg-panel">
+    <div className="group relative aspect-video overflow-hidden rounded-xl bg-panel">
       {picture && (
         <img
           src={picture}
@@ -153,20 +154,20 @@ function NextEpisodeCard({ show }) {
       <Link
         to={`/tv/${show.id}`}
         title="Show details"
-        className="absolute top-3 right-3 rounded-full bg-black/50 p-1.5 text-white/80 backdrop-blur hover:text-white"
+        className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white/80 backdrop-blur hover:text-white"
       >
-        <Info size={18} />
+        <Info size={16} />
       </Link>
 
-      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 p-4">
+      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 p-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-bold text-white">{show.title}</h3>
+          <h3 className="truncate font-bold text-white">{show.title}</h3>
           <p className="truncate text-sm text-white/80">
             <span className="font-semibold text-accent">{episodeLabel(next.season, next.episode)}</span>
             {episode && " · "}
             {episode && <span className={hideSpoilers ? "spoiler" : ""}>{episode.name}</span>}
           </p>
-          <span className="mt-2 inline-block rounded-full bg-black/50 px-2.5 py-0.5 text-xs text-white/90 backdrop-blur">
+          <span className="mt-1.5 inline-block rounded-full bg-black/50 px-2 py-0.5 text-[11px] text-white/90 backdrop-blur">
             {left.episodes} left · {formatRuntime(left.minutes)}
           </span>
         </div>
@@ -174,9 +175,9 @@ function NextEpisodeCard({ show }) {
         <button
           onClick={() => setEpisodes(show, next.season, [next.episode], true)}
           title="Mark as watched"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
         >
-          <Check size={22} strokeWidth={3} />
+          <Check size={18} strokeWidth={3} />
         </button>
       </div>
 
