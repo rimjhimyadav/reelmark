@@ -8,15 +8,18 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 
 ## Features
 
-- **Home** with what's trending today, plus a "continue watching" row for your shows
-- **Explore** movies, shows and anime by popularity, rating or newest, with genre filters and infinite scroll
+- **Home** with what's trending today, a "continue watching" row, and a **what should I watch tonight?** picker that chooses from your Plan to watch list by mood and time
+- **Explore** by streaming app in India (Netflix, Prime Video, JioHotstar...), top 10 today, moods, genres, hidden gems and decades, plus a "see all" grid with filters and infinite scroll
 - **Search** everything at once, open it from anywhere with `Ctrl + K`
 - **Details page** with trailer, cast, where to watch in India and similar titles
-- **Track** anything as Watching, Plan to watch, Completed, On hold, Dropped or Rewatching, and rate it out of 5
+- **Track** anything as Watching, Plan to watch, Completed, On hold, Dropped or Rewatching (each with its own color), and rate it out of 5
 - **Episode tracking** per season. A show moves to Completed by itself when you finish the last episode
-- **Up Next** shows the next episode of every show you're watching, one click to mark it watched
+- **Spoiler mode** blurs names and pictures of episodes you haven't seen
+- **Up Next** shows the next episode of every show you're watching, sorted how you like, with how many episodes and hours are left
+- **Calendar** with new episodes and movie releases from your library
 - **Stats**: total watch time, streaks, a 12 month activity heatmap, hours per month and top genres
-- **Backup**: export your library to a file and import it again (it's all saved in your browser)
+- **Wrapped**: a "your year in watching" card you can download as a picture
+- **Settings**: pick the main color, and export or import your library (it's all saved in your browser)
 
 | Episodes | Up Next |
 | --- | --- |
@@ -33,6 +36,7 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 - Tailwind CSS
 - Zustand (the library is saved to localStorage with its `persist` middleware)
 - Vitest for the tracking and stats logic
+- html-to-image for the wrapped picture
 - [TMDB API](https://developer.themoviedb.org/docs) for all movie and show data
 
 ## Some things I had to figure out
