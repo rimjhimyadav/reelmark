@@ -23,3 +23,15 @@ export function formatDate(dateString) {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
+
+// how long until a release date: "Today", "Tomorrow", "In 5 days", or just the date if it's far away
+// today is passed in so tests can pick their own "today"
+export function countdown(dateString, today = todayString()) {
+  if (!dateString) return "";
+  const days = Math.round((new Date(dateString) - new Date(today)) / (1000 * 60 * 60 * 24));
+  if (days < 0) return "Out now";
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days <= 14) return `In ${days} days`;
+  return new Date(dateString).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}

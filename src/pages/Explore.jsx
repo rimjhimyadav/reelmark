@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { ArrowRight, Brain, Clapperboard, Ghost, Heart, Mountain, Smile, Sparkles, Tv, Zap } from "lucide-react";
-import { getGenres, getHiddenGems, getProviders, getTopTen, imageUrl } from "../api/tmdb";
+import { getGenres, getHiddenGems, getProviders, getTopTen, getUpcomingMovies, imageUrl } from "../api/tmdb";
+import { countdown } from "../utils";
 import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
 import Row from "../components/Row";
@@ -59,8 +60,14 @@ export default function Explore() {
         ))}
       </div>
 
-      <Providers />
       <TopTen />
+      <Row
+        label="Coming soon"
+        title="New in theaters soon"
+        note="Mark the ones you want to see."
+        load={getComingSoon}
+      />
+      <Providers />
 
       <Section label="Moods" title="What are you in the mood for?">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -168,7 +175,7 @@ function GenreTiles() {
   if (!genres) return null;
 
   return (
-    <Section label="Genres" title="Find it by genre">
+    <Section label="Genres" title="Browse by genre">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {genres.map((genre, index) => (
           <Link
@@ -184,7 +191,13 @@ function GenreTiles() {
   );
 }
 
-// useFetch needs a function that stays the same, so this lives outside the component
+// useFetch needs a function that stays the same, so these live outside the component
 function getMovieGenres() {
   return getGenres("movie");
+}
+
+// upcoming movies with a little "In 3 days" tag on the poster
+async function getComingSoon() {
+  const movies = await getUpcomingMovies();
+  return movies.map((movie) => ({ ...movie, badge: countdown(movie.date) }));
 }

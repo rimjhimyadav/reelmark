@@ -23,6 +23,13 @@ export default function PosterCard({ item }) {
             {item.rating}
           </span>
         )}
+
+        {/* extra tag at the bottom, like "In 3 days" on upcoming movies */}
+        {item.badge && (
+          <span className="absolute bottom-2 left-2 rounded-md bg-accent px-2 py-0.5 text-xs font-semibold text-accent-text">
+            {item.badge}
+          </span>
+        )}
       </div>
 
       <h3 className="mt-2 truncate text-sm font-semibold">{item.title}</h3>
