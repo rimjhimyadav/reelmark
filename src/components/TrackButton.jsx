@@ -31,7 +31,8 @@ export default function TrackButton({ item }) {
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-2 rounded-lg border border-text/30 px-5 py-2.5 font-semibold hover:bg-panel-light"
         >
-          <current.icon size={18} /> {current.label} <ChevronDown size={16} className="text-muted" />
+          <current.icon size={18} className={current.text} /> {current.label}{" "}
+          <ChevronDown size={16} className="text-muted" />
         </button>
       ) : (
         <button
@@ -55,7 +56,7 @@ export default function TrackButton({ item }) {
                     : "border-transparent bg-page/40 hover:bg-panel-light"
                 }`}
               >
-                <status.icon size={20} className="text-muted" />
+                <status.icon size={20} className={status.text} />
                 <span>
                   <span className="block font-semibold">{status.label}</span>
                   <span className="block text-sm text-muted">{status.hint}</span>

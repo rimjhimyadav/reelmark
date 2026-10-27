@@ -94,6 +94,7 @@ export default function Library() {
         {STATUSES.map((item) => (
           <StatusChip
             key={item.key}
+            status={item}
             active={status === item.key}
             onClick={() => setStatus(item.key)}
             label={item.label}
@@ -146,7 +147,7 @@ export default function Library() {
       {shown.length === 0 && <p className="mt-16 text-center text-muted">Nothing matches these filters.</p>}
 
       {view === "grid" ? (
-        <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
+        <div className="mt-6 grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8">
           {shown.map((item) => (
             <GridCard key={item.type + item.id} item={item} />
           ))}
@@ -162,14 +163,16 @@ export default function Library() {
   );
 }
 
-function StatusChip({ active, onClick, label, count }) {
+// "status" is empty for the "All" chip
+function StatusChip({ status, active, onClick, label, count }) {
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-4 py-1.5 text-sm whitespace-nowrap transition-colors ${
-        active ? "border-text bg-text text-page" : "border-line text-muted hover:border-muted hover:text-text"
+      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors ${
+        active ? "border-text bg-panel-light text-text" : "border-line text-muted hover:border-muted hover:text-text"
       }`}
     >
+      {status && <status.icon size={15} className={status.text} />}
       {label} <span className="opacity-60">{count}</span>
     </button>
   );
@@ -186,11 +189,13 @@ function GridCard({ item }) {
           loading="lazy"
           className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/75 px-2 py-1 text-xs font-semibold backdrop-blur">
-          <status.icon size={13} /> {status.label}
+        <span
+          className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${status.badge}`}
+        >
+          <status.icon size={12} /> {status.label}
         </span>
       </div>
-      <h3 className="mt-2 truncate text-sm font-semibold">{item.title}</h3>
+      <h3 className="mt-1.5 truncate text-[13px] font-semibold">{item.title}</h3>
       <MyStars rating={item.rating} year={item.year} />
       <ShowProgress item={item} />
     </Link>
@@ -209,7 +214,7 @@ function ListRow({ item }) {
           <ShowProgress item={item} />
         </div>
       </div>
-      <span className="flex shrink-0 items-center gap-1.5 text-sm text-muted">
+      <span className={`flex shrink-0 items-center gap-1.5 text-sm font-medium ${status.text}`}>
         <status.icon size={16} /> <span className="hidden sm:inline">{status.label}</span>
       </span>
     </Link>
@@ -221,11 +226,13 @@ function ShowProgress({ item }) {
   if (item.type !== "tv") return null;
   const progress = getProgress(item);
   if (progress.aired === 0) return null;
+  // "S1 E1 next · 0%" on something you haven't started is just noise
+  if (progress.watched === 0 && item.status !== "watching") return null;
 
   const next = getNextEpisode(item);
   return (
-    <div className="mt-1.5">
-      <p className="mb-1 text-xs text-muted">
+    <div className="mt-1">
+      <p className="mb-1 truncate text-xs text-muted">
         {next ? `${episodeLabel(next.season, next.episode)} next` : "Up to date"} · {progress.percent}%
       </p>
       <ProgressBar percent={progress.percent} className="h-1" />
