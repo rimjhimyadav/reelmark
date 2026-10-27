@@ -182,6 +182,7 @@ function StatusChip({ status, active, onClick, label, count }) {
 
 function GridCard({ item }) {
   const status = getStatus(item.status);
+  const progress = showProgress(item);
   return (
     <Link to={`/${item.type}/${item.id}`} className="group block">
       <div className="relative aspect-2/3 overflow-hidden rounded-xl bg-panel-light">
@@ -205,10 +206,21 @@ function GridCard({ item }) {
             {item.tmdbRating}
           </span>
         )}
+
+        {/* progress sits on the bottom edge of the poster, so every card stays the same height */}
+        {progress && (
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-black/60">
+            <div className="h-full bg-accent" style={{ width: `${progress.percent}%` }} />
+          </div>
+        )}
       </div>
       <h3 className="mt-1.5 truncate text-[13px] font-semibold">{item.title}</h3>
-      <MyStars rating={item.rating} year={item.year} />
-      <ShowProgress item={item} />
+      {/* shows you're in the middle of get "S1 E3 next · 67%" instead of the year */}
+      {progress ? (
+        <p className="truncate text-xs text-muted">{progress.text}</p>
+      ) : (
+        <MyStars rating={item.rating} year={item.year} />
+      )}
     </Link>
   );
 }
@@ -232,8 +244,8 @@ function ListRow({ item }) {
   );
 }
 
-// for shows: "S2 E5 next · 40%" and a bar. movies don't have episodes
-function ShowProgress({ item }) {
+// for shows: { text: "S2 E5 next · 40%", percent: 40 }, or null. movies don't have episodes
+function showProgress(item) {
   if (item.type !== "tv") return null;
   const progress = getProgress(item);
   if (progress.aired === 0) return null;
@@ -241,11 +253,17 @@ function ShowProgress({ item }) {
   if (progress.watched === 0 && item.status !== "watching") return null;
 
   const next = getNextEpisode(item);
+  const nextText = next ? `${episodeLabel(next.season, next.episode)} next` : "Up to date";
+  return { text: `${nextText} · ${progress.percent}%`, percent: progress.percent };
+}
+
+// the list view has more room, so it gets the text and a bar under it
+function ShowProgress({ item }) {
+  const progress = showProgress(item);
+  if (!progress) return null;
   return (
     <div className="mt-1">
-      <p className="mb-1 truncate text-xs text-muted">
-        {next ? `${episodeLabel(next.season, next.episode)} next` : "Up to date"} · {progress.percent}%
-      </p>
+      <p className="mb-1 truncate text-xs text-muted">{progress.text}</p>
       <ProgressBar percent={progress.percent} className="h-1" />
     </div>
   );
