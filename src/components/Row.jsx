@@ -3,9 +3,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import useFetch from "../hooks/useFetch";
 import PosterCard, { PosterSkeleton } from "./PosterCard";
 
-// a title and a list of posters you can scroll sideways
+// a row that loads its own posters, used on home
 export default function Row({ title, load }) {
-  const { data, error, loading } = useFetch(load);
+  const { data, error } = useFetch(load);
+  if (error) return null;
+  return <PosterRow title={title} items={data} />;
+}
+
+// a title and a list of posters you can scroll sideways
+// items = null means it's still loading
+export function PosterRow({ title, items }) {
   const listRef = useRef(null);
 
   function scroll(direction) {
@@ -13,8 +20,6 @@ export default function Row({ title, load }) {
     const distance = listRef.current.clientWidth * 0.8;
     listRef.current.scrollBy({ left: direction * distance, behavior: "smooth" });
   }
-
-  if (error) return null;
 
   return (
     <section className="mt-10">
@@ -31,13 +36,13 @@ export default function Row({ title, load }) {
       </div>
 
       <div ref={listRef} className="no-scrollbar flex snap-x gap-4 overflow-x-auto">
-        {loading && [1, 2, 3, 4, 5, 6, 7].map((n) => (
+        {!items && [1, 2, 3, 4, 5, 6, 7].map((n) => (
           <div key={n} className="w-36 shrink-0 md:w-44">
             <PosterSkeleton />
           </div>
         ))}
 
-        {data && data.map((item) => (
+        {items && items.map((item) => (
           <div key={item.id} className="w-36 shrink-0 snap-start md:w-44">
             <PosterCard item={item} />
           </div>

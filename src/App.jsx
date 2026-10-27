@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router";
+import { Route, Routes, useLocation, useNavigate } from "react-router";
 import Sidebar from "./components/Sidebar";
 import MobileNav from "./components/MobileNav";
 import Home from "./pages/Home";
 import Explore from "./pages/Explore";
 import Search from "./pages/Search";
+import DetailsPage from "./pages/Details";
 import Library from "./pages/Library";
 import UpNext from "./pages/UpNext";
 import Stats from "./pages/Stats";
@@ -13,6 +14,12 @@ import NotFound from "./pages/NotFound";
 
 export default function App() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // when you open a new page, start at the top (react router doesn't do this by itself)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   // ctrl + k (or cmd + k on mac) opens search from any page
   useEffect(() => {
@@ -37,6 +44,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/movie/:id" element={<DetailsPage type="movie" />} />
+          <Route path="/tv/:id" element={<DetailsPage type="tv" />} />
           <Route path="/library" element={<Library />} />
           <Route path="/up-next" element={<UpNext />} />
           <Route path="/stats" element={<Stats />} />

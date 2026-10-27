@@ -145,3 +145,48 @@ export async function search(query) {
   const data = await get("/search/multi", { query, include_adult: false });
   return toItems(data);
 }
+
+// everything for the details page in one request
+// (append_to_response lets us get cast, videos etc. together with the main info)
+export async function getDetails(type, id) {
+  // for shows, "credits" only has the latest season, "aggregate_credits" has everyone
+  const creditsName = type === "movie" ? "credits" : "aggregate_credits";
+  const data = await get(`/${type}/${id}`, {
+    append_to_response: `${creditsName},videos,watch/providers,recommendations`,
+  });
+
+  const item = toItem(data, type);
+
+  // youtube trailer, prefer the official one
+  const youtubeVideos = data.videos.results.filter((video) => video.site === "YouTube");
+  const trailer =
+    youtubeVideos.find((video) => video.type === "Trailer" && video.official) ||
+    youtubeVideos.find((video) => video.type === "Trailer") ||
+    youtubeVideos[0];
+
+  // where to watch in india. the data comes from JustWatch
+  const providersInIndia = data["watch/providers"].results.IN;
+
+  return {
+    ...item,
+    tagline: data.tagline,
+    genres: data.genres.map((genre) => genre.name),
+    // movies have one runtime, shows have a runtime per episode
+    runtime: type === "movie" ? data.runtime : data.episode_run_time[0],
+    status: data.status,
+    // season 0 is "specials", we skip it for now
+    seasons: type === "tv" ? data.seasons.filter((season) => season.season_number > 0) : [],
+    episodeCount: type === "tv" ? data.number_of_episodes : 0,
+    cast: data[creditsName].cast.slice(0, 15).map((person) => ({
+      id: person.id,
+      name: person.name,
+      // in aggregate_credits one person can play many roles, we show the first
+      character: type === "movie" ? person.character : person.roles[0].character,
+      photo: person.profile_path,
+    })),
+    trailerKey: trailer ? trailer.key : null,
+    streaming: providersInIndia && providersInIndia.flatrate ? providersInIndia.flatrate : [],
+    watchLink: providersInIndia ? providersInIndia.link : null,
+    recommendations: toItems(data.recommendations, type),
+  };
+}
