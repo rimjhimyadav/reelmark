@@ -4,7 +4,10 @@ import { Play, Star } from "lucide-react";
 import { getDetails, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import { formatRuntime, plural } from "../utils";
+import { itemKey, useLibrary } from "../store/library";
 import Modal from "../components/Modal";
+import StarRating from "../components/StarRating";
+import TrackButton from "../components/TrackButton";
 import { PosterRow } from "../components/Row";
 
 // the same page is used for /movie/123 and /tv/456
@@ -78,14 +81,19 @@ function Details({ type, id }) {
 
           <p className="mt-5 max-w-3xl leading-relaxed text-text/85">{item.overview}</p>
 
-          {item.trailerKey && (
-            <button
-              onClick={() => setShowTrailer(true)}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-semibold text-accent-text hover:opacity-90"
-            >
-              <Play size={18} className="fill-current" /> Watch trailer
-            </button>
-          )}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <TrackButton item={item} />
+            {item.trailerKey && (
+              <button
+                onClick={() => setShowTrailer(true)}
+                className="inline-flex items-center gap-2 rounded-lg bg-panel-light px-5 py-2.5 font-semibold hover:bg-line"
+              >
+                <Play size={18} className="fill-current" /> Trailer
+              </button>
+            )}
+          </div>
+
+          <MyRating item={item} />
         </div>
       </div>
 
@@ -111,6 +119,21 @@ function Details({ type, id }) {
         </Modal>
       )}
     </>
+  );
+}
+
+// only shows up after you add the title to your library
+function MyRating({ item }) {
+  const key = itemKey(item.type, item.id);
+  const saved = useLibrary((state) => state.items[key]);
+  const setRating = useLibrary((state) => state.setRating);
+  if (!saved) return null;
+
+  return (
+    <div className="mt-5 flex items-center gap-3">
+      <span className="text-sm text-muted">Your rating</span>
+      <StarRating value={saved.rating} onChange={(rating) => setRating(key, rating)} />
+    </div>
   );
 }
 

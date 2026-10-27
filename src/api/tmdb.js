@@ -171,6 +171,8 @@ export async function getDetails(type, id) {
     ...item,
     tagline: data.tagline,
     genres: data.genres.map((genre) => genre.name),
+    // same rule as the anime rows: japanese animation
+    isAnime: data.original_language === "ja" && data.genres.some((genre) => genre.id === ANIMATION),
     // movies have one runtime, shows have a runtime per episode
     runtime: type === "movie" ? data.runtime : data.episode_run_time[0],
     status: data.status,
