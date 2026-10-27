@@ -1,24 +1,50 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { Check } from "lucide-react";
+import { Check, Info } from "lucide-react";
 import { getSeason, getShowInfo, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import { itemKey, useLibrary } from "../store/library";
 import { useSettings } from "../store/settings";
 import { episodeLabel, getNextEpisode, getProgress } from "../progress";
-import { formatDate } from "../utils";
+import { formatDate, formatRuntime } from "../utils";
 import PageTitle from "../components/PageTitle";
 import ProgressBar from "../components/ProgressBar";
+
+const SORTS = [
+  { key: "recent", label: "Last watched" },
+  { key: "fewest", label: "Fewest left" },
+  { key: "most", label: "Most left" },
+  { key: "shortest", label: "Least time left" },
+  { key: "longest", label: "Most time left" },
+];
+
+// how many episodes are left and how long they take, for "24 left · 9h 36m"
+function getLeft(show) {
+  const progress = getProgress(show);
+  const episodes = progress.aired - progress.watched;
+  return { episodes, minutes: episodes * (show.runtime || 40) };
+}
+
+function sortShows(shows, sort) {
+  const sorted = [...shows];
+  if (sort === "recent") sorted.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  if (sort === "fewest") sorted.sort((a, b) => getLeft(a).episodes - getLeft(b).episodes);
+  if (sort === "most") sorted.sort((a, b) => getLeft(b).episodes - getLeft(a).episodes);
+  if (sort === "shortest") sorted.sort((a, b) => getLeft(a).minutes - getLeft(b).minutes);
+  if (sort === "longest") sorted.sort((a, b) => getLeft(b).minutes - getLeft(a).minutes);
+  return sorted;
+}
 
 export default function UpNext() {
   const items = Object.values(useLibrary((state) => state.items));
   const updateShowInfo = useLibrary((state) => state.updateShowInfo);
+  const [sort, setSort] = useState("recent");
 
   const shows = items.filter((item) => item.type === "tv" && (item.status === "watching" || item.status === "rewatching"));
   const movies = items.filter((item) => item.type === "movie" && item.status === "watching");
 
   // shows you have an episode ready for, and shows waiting for the next episode
-  const ready = shows.filter((show) => getNextEpisode(show));
+  const ready = sortShows(shows.filter((show) => getNextEpisode(show)), sort);
   const waiting = shows.filter((show) => !getNextEpisode(show) && show.nextAir);
 
   // a list of ids as text, so the effect below only runs again when a show is added or removed
@@ -45,8 +71,24 @@ export default function UpNext() {
         </div>
       )}
 
+      {ready.length > 1 && (
+        <div className="no-scrollbar mb-5 flex gap-2 overflow-x-auto">
+          {SORTS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setSort(item.key)}
+              className={`shrink-0 rounded-full border px-4 py-1.5 text-sm whitespace-nowrap transition-colors ${
+                sort === item.key ? "border-text bg-panel-light text-text" : "border-line text-muted hover:text-text"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {ready.length > 0 && (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {/* the key has the season in it, so the card starts fresh when you move to a new season */}
           {ready.map((show) => (
             <NextEpisodeCard key={show.id + "-" + getNextEpisode(show).season} show={show} />
@@ -94,6 +136,7 @@ export default function UpNext() {
 function NextEpisodeCard({ show }) {
   const next = getNextEpisode(show);
   const progress = getProgress(show);
+  const left = getLeft(show);
   const setEpisodes = useLibrary((state) => state.setEpisodes);
   const hideSpoilers = useSettings((state) => state.hideSpoilers);
 
@@ -102,41 +145,55 @@ function NextEpisodeCard({ show }) {
   const { data: episodes } = useFetch(loadSeason);
   const episode = episodes ? episodes.find((ep) => ep.number === next.episode) : null;
 
-  const picture = episode && episode.still ? imageUrl(episode.still, "w500") : imageUrl(show.backdrop, "w780");
+  const picture = episode && episode.still ? imageUrl(episode.still, "w780") : imageUrl(show.backdrop, "w780");
 
   return (
-    <div className="flex min-w-0 gap-4 rounded-2xl bg-panel p-3">
-      <Link to={`/tv/${show.id}`} className="relative w-32 shrink-0 overflow-hidden rounded-xl bg-panel-light sm:w-56">
-        {picture && (
-          <img src={picture} alt="" className={`aspect-video size-full object-cover ${hideSpoilers ? "spoiler" : ""}`} />
-        )}
+    <div className="group relative aspect-video overflow-hidden rounded-2xl bg-panel">
+      {picture && (
+        <img
+          src={picture}
+          alt=""
+          className={`absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+            hideSpoilers ? "spoiler" : ""
+          }`}
+        />
+      )}
+      {/* dark fade at the bottom so the text is readable on any picture */}
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
+
+      <Link
+        to={`/tv/${show.id}`}
+        title="Show details"
+        className="absolute top-3 right-3 rounded-full bg-black/50 p-1.5 text-white/80 backdrop-blur hover:text-white"
+      >
+        <Info size={18} />
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Link to={`/tv/${show.id}`} className="truncate font-bold hover:underline">
-          {show.title}
-        </Link>
-        <p className="truncate text-sm text-muted">
-          {episodeLabel(next.season, next.episode)}
-          {episode && " · "}
-          {episode && <span className={hideSpoilers ? "spoiler" : ""}>{episode.name}</span>}
-        </p>
-
-        <div className="mt-auto flex items-end gap-3 pt-3">
-          <div className="flex-1">
-            <p className="mb-1 text-xs text-muted">
-              {progress.watched} of {progress.aired} episodes
-            </p>
-            <ProgressBar percent={progress.percent} />
-          </div>
-          <button
-            onClick={() => setEpisodes(show, next.season, [next.episode], true)}
-            title="Mark as watched"
-            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-text hover:opacity-90"
-          >
-            <Check size={16} strokeWidth={3} /> <span className="hidden sm:inline">Watched</span>
-          </button>
+      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 p-4">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-lg font-bold text-white">{show.title}</h3>
+          <p className="truncate text-sm text-white/80">
+            <span className="font-semibold text-accent">{episodeLabel(next.season, next.episode)}</span>
+            {episode && " · "}
+            {episode && <span className={hideSpoilers ? "spoiler" : ""}>{episode.name}</span>}
+          </p>
+          <span className="mt-2 inline-block rounded-full bg-black/50 px-2.5 py-0.5 text-xs text-white/90 backdrop-blur">
+            {left.episodes} left · {formatRuntime(left.minutes)}
+          </span>
         </div>
+
+        <button
+          onClick={() => setEpisodes(show, next.season, [next.episode], true)}
+          title="Mark as watched"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
+        >
+          <Check size={22} strokeWidth={3} />
+        </button>
+      </div>
+
+      {/* thin progress line along the bottom edge */}
+      <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
+        <div className="h-full bg-accent" style={{ width: `${progress.percent}%` }} />
       </div>
     </div>
   );
