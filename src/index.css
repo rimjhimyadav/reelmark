@@ -35,3 +35,12 @@ body {
     opacity: 0;
   }
 }
+
+/* spoiler mode: blurry until you hover (or tap on a phone) */
+@utility spoiler {
+  filter: blur(6px);
+  transition: filter 0.2s;
+  &:hover {
+    filter: none;
+  }
+}

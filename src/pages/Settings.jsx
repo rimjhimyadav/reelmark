@@ -61,6 +61,7 @@ export default function Settings() {
       <PageTitle title="Settings" />
 
       <AccentPicker />
+      <SpoilerSetting />
 
       <section className="mt-4 max-w-2xl rounded-2xl bg-panel p-6">
         <h2 className="text-lg font-bold">Your library</h2>
@@ -170,6 +171,37 @@ function AccentPicker() {
           </button>
         ))}
       </div>
+    </section>
+  );
+}
+
+function SpoilerSetting() {
+  const hideSpoilers = useSettings((state) => state.hideSpoilers);
+  const toggleSpoilers = useSettings((state) => state.toggleSpoilers);
+
+  return (
+    <section className="mt-4 flex max-w-2xl items-center justify-between gap-6 rounded-2xl bg-panel p-6">
+      <div>
+        <h2 className="text-lg font-bold">Hide spoilers</h2>
+        <p className="mt-1 text-sm text-muted">
+          Blur the names and pictures of episodes you haven’t watched yet. Hover (or tap) to see them.
+        </p>
+      </div>
+
+      {/* a simple on/off switch */}
+      <button
+        onClick={toggleSpoilers}
+        role="switch"
+        aria-checked={hideSpoilers}
+        title={hideSpoilers ? "Turn off" : "Turn on"}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${hideSpoilers ? "bg-accent" : "bg-panel-light"}`}
+      >
+        <span
+          className={`absolute top-1 size-5 rounded-full bg-text shadow transition-all ${
+            hideSpoilers ? "left-6 bg-accent-text" : "left-1"
+          }`}
+        />
+      </button>
     </section>
   );
 }

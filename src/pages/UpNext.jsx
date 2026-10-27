@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { getSeason, getShowInfo, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import { itemKey, useLibrary } from "../store/library";
+import { useSettings } from "../store/settings";
 import { episodeLabel, getNextEpisode, getProgress } from "../progress";
 import { formatDate } from "../utils";
 import PageTitle from "../components/PageTitle";
@@ -94,6 +95,7 @@ function NextEpisodeCard({ show }) {
   const next = getNextEpisode(show);
   const progress = getProgress(show);
   const setEpisodes = useLibrary((state) => state.setEpisodes);
+  const hideSpoilers = useSettings((state) => state.hideSpoilers);
 
   // the season list has the episode name and picture
   const loadSeason = useCallback(() => getSeason(show.id, next.season), [show.id, next.season]);
@@ -105,7 +107,9 @@ function NextEpisodeCard({ show }) {
   return (
     <div className="flex min-w-0 gap-4 rounded-2xl bg-panel p-3">
       <Link to={`/tv/${show.id}`} className="relative w-32 shrink-0 overflow-hidden rounded-xl bg-panel-light sm:w-56">
-        {picture && <img src={picture} alt="" className="aspect-video size-full object-cover" />}
+        {picture && (
+          <img src={picture} alt="" className={`aspect-video size-full object-cover ${hideSpoilers ? "spoiler" : ""}`} />
+        )}
       </Link>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -114,7 +118,8 @@ function NextEpisodeCard({ show }) {
         </Link>
         <p className="truncate text-sm text-muted">
           {episodeLabel(next.season, next.episode)}
-          {episode && ` · ${episode.name}`}
+          {episode && " · "}
+          {episode && <span className={hideSpoilers ? "spoiler" : ""}>{episode.name}</span>}
         </p>
 
         <div className="mt-auto flex items-end gap-3 pt-3">

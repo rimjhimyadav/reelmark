@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import { getSeason } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import { itemKey, useLibrary } from "../store/library";
+import { useSettings } from "../store/settings";
 import { episodeKey, getNextEpisode } from "../progress";
 import { formatDate, formatRuntime, todayString } from "../utils";
 import ProgressBar from "./ProgressBar";
@@ -49,6 +50,7 @@ export default function Episodes({ item }) {
 
 function SeasonEpisodes({ item, season, watched }) {
   const setEpisodes = useLibrary((state) => state.setEpisodes);
+  const hideSpoilers = useSettings((state) => state.hideSpoilers);
   const loadSeason = useCallback(() => getSeason(item.id, season), [item.id, season]);
   const { data: episodes, error } = useFetch(loadSeason);
   const [showAll, setShowAll] = useState(false);
@@ -113,7 +115,13 @@ function SeasonEpisodes({ item, season, watched }) {
 
             <span className="w-8 shrink-0 text-sm text-muted">E{episode.number}</span>
             <div className="min-w-0 flex-1">
-              <p className={`truncate font-medium ${isWatched ? "text-muted" : ""}`}>{episode.name}</p>
+              <p
+                className={`truncate font-medium ${isWatched ? "text-muted" : ""} ${
+                  hideSpoilers && !isWatched ? "spoiler" : ""
+                }`}
+              >
+                {episode.name}
+              </p>
               {/* on phones the date goes under the name, there's no room next to it */}
               <p className="text-xs text-muted sm:hidden">{airText}</p>
             </div>
