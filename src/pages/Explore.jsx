@@ -1,6 +1,15 @@
 import { Link } from "react-router";
 import { ArrowRight, Brain, Clapperboard, Ghost, Heart, Mountain, Smile, Sparkles, Tv, Zap } from "lucide-react";
-import { getGenres, getHiddenGems, getProviders, getTopTen, getUpcomingMovies, imageUrl } from "../api/tmdb";
+import {
+  getGenres,
+  getHiddenGems,
+  getProviders,
+  getSeasonalMovies,
+  getTopTen,
+  getUpcomingMovies,
+  imageUrl,
+} from "../api/tmdb";
+import { getSeason } from "../seasons";
 import { countdown } from "../utils";
 import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
@@ -61,6 +70,7 @@ export default function Explore() {
         ))}
       </div>
 
+      <Row label={season.label} title={season.title} note={season.note} load={getThisSeason} />
       <TopTen />
       <TrailerRow />
       <Row
@@ -196,6 +206,12 @@ function GenreTiles() {
 // useFetch needs a function that stays the same, so these live outside the component
 function getMovieGenres() {
   return getGenres("movie");
+}
+
+// the seasonal row: spooky in october, cozy in december and so on
+const season = getSeason();
+function getThisSeason() {
+  return getSeasonalMovies(season.params);
 }
 
 // upcoming movies with a little "In 3 days" tag on the poster
