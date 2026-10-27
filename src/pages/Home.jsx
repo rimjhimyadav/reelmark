@@ -2,12 +2,14 @@ import { getPopularAnime, getTrendingMovies, getTrendingShows, getUpcomingMovies
 import Hero from "../components/Hero";
 import Row from "../components/Row";
 import ContinueWatching from "../components/ContinueWatching";
+import TonightPicker from "../components/TonightPicker";
 
 export default function Home() {
   return (
     <>
       <Hero />
       <ContinueWatching />
+      <TonightPicker />
       <Row title="Trending movies" load={getTrendingMovies} />
       <Row title="Popular shows today" load={getTrendingShows} />
       <Row title="Popular anime" load={getPopularAnime} />
