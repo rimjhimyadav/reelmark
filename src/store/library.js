@@ -20,6 +20,7 @@ function newLibraryItem(item, status) {
     backdrop: item.backdrop,
     year: item.year,
     genres: item.genres,
+    tmdbRating: item.rating, // the TMDB score. "rating" below is your own stars
     runtime: item.runtime, // for shows this is one episode
     // only for shows
     seasons: item.seasons,
@@ -103,7 +104,7 @@ export const useLibrary = create(
           return { items: { ...state.items, [key]: newItem } };
         }),
 
-      // new seasons come out, so we refresh the saved show info sometimes
+      // new seasons come out and scores change, so we refresh the saved info sometimes
       updateShowInfo: (key, info) =>
         set((state) => {
           if (!state.items[key]) return state;

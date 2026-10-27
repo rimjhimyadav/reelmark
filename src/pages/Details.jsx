@@ -24,16 +24,17 @@ function Details({ type, id }) {
   const [showTrailer, setShowTrailer] = useState(false);
   const updateShowInfo = useLibrary((state) => state.updateShowInfo);
 
-  // if you track this show, save the newest season info (a new season may be out)
+  // if you track this title, save the newest info (a new season may be out, the score changes)
   useEffect(() => {
-    if (item && item.type === "tv") {
-      updateShowInfo(itemKey(item.type, item.id), {
-        seasons: item.seasons,
-        lastAired: item.lastAired,
-        nextAir: item.nextAir,
-        ended: item.ended,
-      });
+    if (!item) return;
+    const info = { tmdbRating: item.rating };
+    if (item.type === "tv") {
+      info.seasons = item.seasons;
+      info.lastAired = item.lastAired;
+      info.nextAir = item.nextAir;
+      info.ended = item.ended;
     }
+    updateShowInfo(itemKey(item.type, item.id), info);
   }, [item, updateShowInfo]);
 
   if (error) {

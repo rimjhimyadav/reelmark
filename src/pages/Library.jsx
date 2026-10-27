@@ -189,11 +189,20 @@ function GridCard({ item }) {
           loading="lazy"
           className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
+        {/* status as a small colored circle, the name shows when you hover it */}
         <span
-          className={`absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${status.badge}`}
+          title={status.label}
+          className={`absolute top-1.5 left-1.5 flex size-7 items-center justify-center rounded-full shadow-lg ring-2 ring-black/30 ${status.badge}`}
         >
-          <status.icon size={12} /> {status.label}
+          <status.icon size={15} strokeWidth={2.5} />
         </span>
+
+        {item.tmdbRating && (
+          <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-semibold backdrop-blur">
+            <Star size={11} className="fill-yellow-400 text-yellow-400" />
+            {item.tmdbRating}
+          </span>
+        )}
       </div>
       <h3 className="mt-1.5 truncate text-[13px] font-semibold">{item.title}</h3>
       <MyStars rating={item.rating} year={item.year} />
