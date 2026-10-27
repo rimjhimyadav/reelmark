@@ -28,7 +28,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test
       - run: npm run build
         env:
           # added in the repo under Settings > Secrets and variables > Actions

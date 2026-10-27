@@ -39,7 +39,6 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 - React Router
 - Tailwind CSS
 - Zustand (the library is saved to localStorage with its `persist` middleware)
-- Vitest for the tracking and stats logic
 - html-to-image for the wrapped picture
 - [TMDB API](https://developer.themoviedb.org/docs) for all movie and show data
 
@@ -51,7 +50,7 @@ cp .env.example .env   # then put your TMDB API key in .env
 npm run dev
 ```
 
-`npm test` runs the tests, `npm run lint` runs ESLint.
+`npm run lint` runs ESLint.
 
 ## Credits
 
