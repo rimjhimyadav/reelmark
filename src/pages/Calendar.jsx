@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import { imageUrl } from "../api/tmdb";
 import { useLibrary } from "../store/library";
@@ -20,6 +21,7 @@ function dayTitle(dateString, today) {
 export default function Calendar() {
   const items = Object.values(useLibrary((state) => state.items));
   const today = todayString();
+  const [selected, setSelected] = useState(null); // a date like "2026-10-28", or null for all days
 
   useRefreshShows(airingShows(items));
   // dropped shows still have dates, but you don't care about them anymore
@@ -32,9 +34,15 @@ export default function Calendar() {
     week.push({ date, count: events.filter((event) => event.date === date).length });
   }
 
+  // click a day to see only that day, click it again to see everything
+  function toggleDay(date) {
+    setSelected(selected === date ? null : date);
+  }
+  const shownEvents = selected ? events.filter((event) => event.date === selected) : events;
+
   // group the list by day: { "2026-10-28": [event, event], ... }
   const byDay = {};
-  for (const event of events) {
+  for (const event of shownEvents) {
     if (!byDay[event.date]) byDay[event.date] = [];
     byDay[event.date].push(event);
   }
@@ -44,22 +52,41 @@ export default function Calendar() {
       <PageTitle title="Calendar" text="New episodes and movie releases from your library." />
 
       <div className="grid grid-cols-7 gap-2">
-        {week.map((day) => (
-          <div
-            key={day.date}
-            className={`rounded-xl p-2 text-center md:p-3 ${day.count > 0 ? "bg-panel-light" : "bg-panel"} ${
-              day.date === today ? "ring-2 ring-accent" : ""
-            }`}
-          >
-            <p className="text-xs text-muted uppercase">
-              {toDate(day.date).toLocaleDateString("en-IN", { weekday: "short" })}
-            </p>
-            <p className="mt-1 text-xl font-bold">{toDate(day.date).getDate()}</p>
-            <p className={`mt-1 text-xs ${day.count > 0 ? "font-semibold text-accent" : "text-muted"}`}>
-              {day.count > 0 ? `${day.count} new` : "–"}
-            </p>
-          </div>
-        ))}
+        {week.map((day) => {
+          const isSelected = day.date === selected;
+          let color = day.count > 0 ? "bg-panel-light hover:bg-line" : "bg-panel hover:bg-panel-light";
+          let countColor = day.count > 0 ? "font-semibold text-accent" : "text-muted";
+          if (isSelected) {
+            color = "bg-accent text-accent-text";
+            countColor = "font-semibold";
+          }
+
+          return (
+            <button
+              key={day.date}
+              onClick={() => toggleDay(day.date)}
+              className={`rounded-xl p-2 text-center transition-colors md:p-3 ${color} ${
+                day.date === today ? "ring-2 ring-accent ring-offset-2 ring-offset-page" : ""
+              }`}
+            >
+              <p className={`text-xs uppercase ${isSelected ? "opacity-80" : "text-muted"}`}>
+                {toDate(day.date).toLocaleDateString("en-IN", { weekday: "short" })}
+              </p>
+              <p className="mt-1 text-xl font-bold">{toDate(day.date).getDate()}</p>
+              <p className={`mt-1 text-xs ${countColor}`}>
+                {/* phones only have room for the number */}
+                {day.count > 0 ? (
+                  <>
+                    {day.count}
+                    <span className="hidden sm:inline"> new</span>
+                  </>
+                ) : (
+                  "–"
+                )}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {events.length === 0 && (
@@ -71,26 +98,44 @@ export default function Calendar() {
         </div>
       )}
 
+      {events.length > 0 && selected && shownEvents.length === 0 && (
+        <div className="mt-8 rounded-2xl border border-dashed border-line p-10 text-center">
+          <h2 className="font-semibold">{dayTitle(selected, today)}</h2>
+          <p className="mt-1 text-muted">Nothing from your library comes out on this day.</p>
+          <button onClick={() => setSelected(null)} className="mt-3 text-sm font-semibold text-accent hover:underline">
+            Show all days
+          </button>
+        </div>
+      )}
+
       {Object.keys(byDay).map((date) => (
         <section key={date} className="mt-8">
           <h2 className="mb-3 text-lg font-bold">{dayTitle(date, today)}</h2>
-          <div className="flex flex-col gap-2">
+          {/* cards, as many as fit in a row */}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
             {byDay[date].map((event) => (
-              <Link
-                key={event.item.type + event.item.id}
-                to={`/${event.item.type}/${event.item.id}`}
-                className="flex items-center gap-4 rounded-xl bg-panel p-2.5 hover:bg-panel-light"
-              >
-                <img src={imageUrl(event.item.poster, "w92")} alt="" className="h-18 w-12 rounded-md object-cover" />
-                <div className="min-w-0">
-                  <h3 className="truncate font-semibold">{event.item.title}</h3>
-                  <p className="text-sm text-muted">{event.text}</p>
-                </div>
-              </Link>
+              <EventCard key={event.item.type + event.item.id} event={event} />
             ))}
           </div>
         </section>
       ))}
     </>
+  );
+}
+
+function EventCard({ event }) {
+  const { item } = event;
+  return (
+    <Link
+      to={`/${item.type}/${item.id}`}
+      className="group relative flex gap-3 overflow-hidden rounded-xl bg-panel p-3 transition-colors hover:bg-panel-light"
+    >
+      <img src={imageUrl(item.poster, "w154")} alt="" className="h-24 w-16 shrink-0 rounded-lg object-cover" />
+      <div className="flex min-w-0 flex-col justify-center">
+        <p className="text-xs font-semibold text-accent">{event.text}</p>
+        <h3 className="mt-0.5 line-clamp-2 font-semibold">{item.title}</h3>
+        <p className="mt-1 text-xs text-muted">{item.type === "movie" ? "In theaters" : "New episode"}</p>
+      </div>
+    </Link>
   );
 }
