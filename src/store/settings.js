@@ -8,6 +8,9 @@ export const useSettings = create(
       sidebarCollapsed: false,
       toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
+      accent: "violet",
+      setAccent: (accent) => set({ accent }),
+
       // blur names and pictures of episodes you haven't watched yet
       hideSpoilers: false,
       toggleSpoilers: () => set((state) => ({ hideSpoilers: !state.hideSpoilers })),

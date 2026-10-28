@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Check, Download, Trash2, Upload } from "lucide-react";
 import { useLibrary } from "../store/library";
 import { useSettings } from "../store/settings";
+import { ACCENTS } from "../accents";
 import { plural, todayString } from "../utils";
 import PageTitle from "../components/PageTitle";
 import Modal from "../components/Modal";
@@ -59,6 +60,7 @@ export default function Settings() {
     <>
       <PageTitle title="Settings" />
 
+      <AccentPicker />
       <SpoilerSetting />
 
       <section className="mt-4 max-w-2xl rounded-2xl bg-panel p-6">
@@ -145,12 +147,49 @@ export default function Settings() {
   );
 }
 
+function AccentPicker() {
+  const accent = useSettings((state) => state.accent);
+  const setAccent = useSettings((state) => state.setAccent);
+  const current = ACCENTS.find((item) => item.key === accent) || ACCENTS[0];
+
+  return (
+    <section className="max-w-2xl rounded-2xl bg-panel p-6">
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-lg font-bold">Main color</h2>
+        <span className="text-sm font-semibold text-accent">{current.label}</span>
+      </div>
+      <p className="mt-1 text-sm text-muted">Used for buttons, progress bars, charts and the glow behind the page.</p>
+
+      <div className="mt-5 grid grid-cols-6 justify-items-center gap-3 sm:gap-4">
+        {ACCENTS.map((item) => {
+          const isPicked = item.key === current.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => setAccent(item.key)}
+              title={item.label}
+              aria-label={item.label}
+              aria-pressed={isPicked}
+              className={`flex size-10 items-center justify-center rounded-full transition-transform hover:scale-110 sm:size-11 ${
+                isPicked ? "ring-2 ring-text ring-offset-4 ring-offset-panel" : ""
+              }`}
+              style={{ backgroundColor: item.color, color: item.text }}
+            >
+              {isPicked && <Check size={18} strokeWidth={3} />}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function SpoilerSetting() {
   const hideSpoilers = useSettings((state) => state.hideSpoilers);
   const toggleSpoilers = useSettings((state) => state.toggleSpoilers);
 
   return (
-    <section className="flex max-w-2xl items-center justify-between gap-6 rounded-2xl bg-panel p-6">
+    <section className="mt-4 flex max-w-2xl items-center justify-between gap-6 rounded-2xl bg-panel p-6">
       <div>
         <h2 className="text-lg font-bold">Hide spoilers</h2>
         <p className="mt-1 text-sm text-muted">

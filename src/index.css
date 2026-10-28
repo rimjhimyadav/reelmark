@@ -12,7 +12,7 @@
   --color-text: #f4f4f5;
   --color-muted: #8f98ba;
 
-  /* main color (violet), and the text color that sits on top of it */
+  /* main color (violet by default, you can change it in settings), and the text color that sits on top of it */
   --color-accent: #7c5cff;
   --color-accent-text: #ffffff;
 }
@@ -20,10 +20,10 @@
 body {
   background-color: var(--color-page);
   color: var(--color-text);
-  /* a soft violet glow at the top so the page isn't flat black */
+  /* a soft glow in the main color at the top, so the page isn't flat black */
   background-image:
-    radial-gradient(900px 500px at 15% -10%, rgb(124 92 255 / 0.16), transparent 70%),
-    radial-gradient(700px 400px at 100% 0%, rgb(124 92 255 / 0.08), transparent 70%);
+    radial-gradient(900px 500px at 15% -10%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
+    radial-gradient(700px 400px at 100% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 70%);
   background-attachment: fixed;
 }
 
