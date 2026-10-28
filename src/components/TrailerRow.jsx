@@ -14,7 +14,7 @@ export default function TrailerRow() {
 
   return (
     <section className="mt-10">
-      <SectionTitle label="Trailers" title="Watch the newest trailers" note="For movies coming out soon." />
+      <SectionTitle title="Watch the newest trailers" note="For movies coming out soon." />
 
       <div className="no-scrollbar flex snap-x gap-4 overflow-x-auto">
         {movies.map((movie) => (

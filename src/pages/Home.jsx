@@ -22,15 +22,15 @@ export default function Home() {
           <ThisWeek />
           <TonightPicker />
           <BecauseYouWatched />
-          <Row label="Trending" title="What everyone's watching today" load={getTrending} />
+          <Row title="What everyone's watching today" load={getTrending} />
         </>
       ) : (
         // nothing tracked yet (like the first visit), so show popular stuff instead of an empty page
         <>
           <StartTracking />
-          <Row label="Trending" title="Movies everyone's watching" load={getTrendingMovies} />
-          <Row label="Trending" title="Popular shows today" load={getTrendingShows} />
-          <Row label="Anime" title="Popular anime right now" load={getPopularAnime} />
+          <Row title="Movies everyone's watching" load={getTrendingMovies} />
+          <Row title="Popular shows today" load={getTrendingShows} />
+          <Row title="Popular anime right now" load={getPopularAnime} />
         </>
       )}
     </>

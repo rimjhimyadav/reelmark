@@ -56,12 +56,20 @@ function Details({ type, id }) {
 
   return (
     <>
-      {/* wide image on top */}
-      <div className="relative h-56 overflow-hidden rounded-2xl bg-panel md:h-96">
+      {/* the same picture again, very blurry and dark, behind the whole page.
+          it gives the glass panels below some color to blur (a plain blur filter, so it stays fast) */}
+      {item.backdrop && (
+        <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
+          <img src={imageUrl(item.backdrop, "w780")} alt="" className="size-full scale-110 object-cover opacity-50 blur-3xl" />
+          <div className="absolute inset-0 bg-page/55" />
+        </div>
+      )}
+
+      {/* wide image on top, it fades out at the bottom into the blurry one */}
+      <div className="relative h-56 overflow-hidden rounded-2xl [mask-image:linear-gradient(to_bottom,black_45%,transparent)] md:h-96">
         {item.backdrop && (
-          <img src={imageUrl(item.backdrop, "w1280")} alt="" className="size-full object-cover opacity-60" />
+          <img src={imageUrl(item.backdrop, "w1280")} alt="" className="size-full object-cover opacity-70" />
         )}
-        <div className="absolute inset-0 bg-linear-to-t from-page to-transparent" />
       </div>
 
       <div className="relative -mt-24 flex flex-col gap-6 px-2 md:-mt-40 md:flex-row md:gap-10 md:px-8">
@@ -72,7 +80,7 @@ function Details({ type, id }) {
         />
 
         <div className="md:pt-24">
-          <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">{item.title}</h1>
+          <h1 className="font-display text-4xl font-extrabold tracking-wide md:text-6xl">{item.title}</h1>
           {item.tagline && <p className="mt-2 text-muted italic">{item.tagline}</p>}
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
@@ -89,7 +97,7 @@ function Details({ type, id }) {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {item.genres.map((genre) => (
-              <span key={genre} className="rounded-full border border-line px-3 py-1 text-xs text-muted">
+              <span key={genre} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-text/80">
                 {genre}
               </span>
             ))}
@@ -102,7 +110,7 @@ function Details({ type, id }) {
             {item.trailerKey && (
               <button
                 onClick={() => setShowTrailer(true)}
-                className="inline-flex items-center gap-2 rounded-lg bg-panel-light px-5 py-2.5 font-semibold hover:bg-line"
+                className="glass inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition-colors hover:bg-white/10"
               >
                 <Play size={18} className="fill-current" /> Trailer
               </button>
@@ -112,7 +120,7 @@ function Details({ type, id }) {
                 href={`https://www.imdb.com/title/${item.imdbId}/`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg bg-panel-light px-5 py-2.5 font-semibold hover:bg-line"
+                className="glass inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition-colors hover:bg-white/10"
               >
                 IMDb <ExternalLink size={16} className="text-muted" />
               </a>
@@ -132,7 +140,7 @@ function Details({ type, id }) {
         <WhereToWatch providers={item.streaming} link={item.watchLink} />
       </div>
 
-      {item.recommendations.length > 0 && <PosterRow label="Recommended" title="More like this" items={item.recommendations} />}
+      {item.recommendations.length > 0 && <PosterRow title="More like this" items={item.recommendations} />}
 
       {showTrailer && (
         <TrailerModal title={item.title} videoKey={item.trailerKey} onClose={() => setShowTrailer(false)} />
@@ -159,7 +167,7 @@ function MyRating({ item }) {
 function Cast({ cast }) {
   return (
     <section>
-      <SectionTitle label="Cast" title="Who's in it" />
+      <SectionTitle title="Who's in it" />
       <div className="no-scrollbar flex gap-4 overflow-x-auto">
         {cast.map((person) => (
           <div key={person.id} className="w-24 shrink-0 text-center">
@@ -180,7 +188,7 @@ function Cast({ cast }) {
 function Reviews({ reviews }) {
   return (
     <section className="mt-10">
-      <SectionTitle label="Reviews" title="What people are saying" note="Reviews from TMDB users." />
+      <SectionTitle title="What people are saying" note="Reviews from TMDB users." />
       <div className="flex flex-col gap-3">
         {reviews.map((review) => (
           <Review key={review.id} review={review} />
@@ -196,7 +204,7 @@ function Review({ review }) {
   const isLong = review.text.length > 400;
 
   return (
-    <article className="rounded-2xl bg-panel p-5">
+    <article className="glass rounded-2xl p-5">
       <div className="flex items-center gap-3">
         {/* first letter of the name as a little avatar */}
         <span className="flex size-9 items-center justify-center rounded-full bg-accent font-bold text-accent-text uppercase">
@@ -228,7 +236,7 @@ function Review({ review }) {
 
 function WhereToWatch({ providers, link }) {
   return (
-    <aside className="self-start rounded-2xl bg-panel p-5">
+    <aside className="glass self-start rounded-2xl p-5">
       <h2 className="mb-4 text-lg font-bold">Where to watch</h2>
 
       {providers.length === 0 && <p className="text-sm text-muted">Not streaming in India right now.</p>}
@@ -240,7 +248,7 @@ function WhereToWatch({ providers, link }) {
             href={link}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-3 rounded-lg hover:bg-panel-light"
+            className="flex items-center gap-3 rounded-lg hover:bg-white/5"
           >
             <img src={imageUrl(provider.logo_path, "w92")} alt="" className="size-10 rounded-lg" />
             <span className="font-medium">{provider.provider_name}</span>

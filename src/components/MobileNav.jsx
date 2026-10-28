@@ -9,7 +9,7 @@ const topLinks = links.filter((link) => link.mobile === false);
 export default function MobileNav() {
   return (
     <>
-      <header className="sticky top-0 z-20 flex items-center justify-between border-b border-line bg-page/90 px-4 py-3 backdrop-blur md:hidden">
+      <header className="glass sticky top-0 z-20 flex items-center justify-between px-4 py-3 md:hidden">
         <Logo />
         <div className="flex gap-1">
           {topLinks.map((link) => (
@@ -25,14 +25,17 @@ export default function MobileNav() {
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-line bg-panel md:hidden">
+      {/* floats a bit above the bottom edge (and above the iphone home bar), so posters scroll behind it */}
+      <nav className="glass fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-20 grid grid-cols-5 gap-1 rounded-[28px] p-1.5 md:hidden">
         {bottomLinks.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             end={link.to === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 py-2.5 text-xs font-medium ${isActive ? "text-text" : "text-muted"}`
+              `flex flex-col items-center gap-1 rounded-[22px] py-2 text-xs font-medium transition-colors ${
+                isActive ? "bg-white/10 text-text" : "text-muted"
+              }`
             }
           >
             <link.icon size={20} />

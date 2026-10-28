@@ -19,7 +19,7 @@ export default function ThisWeek() {
 
   return (
     <section className="mt-10">
-      <SectionTitle label="This week" title="New from your shows">
+      <SectionTitle title="New from your shows">
         <Link to="/calendar" className="text-sm font-semibold text-muted hover:text-text">
           Calendar
         </Link>

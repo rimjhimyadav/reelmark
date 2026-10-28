@@ -5,42 +5,36 @@
 const SEASONS = [
   {
     months: [0, 2],
-    label: "Award season",
     title: "Big dramas everyone talks about",
     note: "Catch up before the Oscars.",
     params: { with_genres: "18", sort_by: "vote_average.desc", "vote_count.gte": 3000 },
   },
   {
     months: [1],
-    label: "Valentine's month",
     title: "Love stories worth watching",
     note: "For date night, or a night in.",
     params: { with_genres: "10749", sort_by: "popularity.desc" },
   },
   {
     months: [3, 4, 5],
-    label: "Summer break",
     title: "Big summer blockbusters",
     note: "Loud, fun and made for a big screen.",
     params: { with_genres: "28|12", sort_by: "popularity.desc" },
   },
   {
     months: [6, 7, 8],
-    label: "Monsoon",
     title: "Rainy day comfort movies",
     note: "Chai, a blanket and one of these.",
     params: { with_genres: "35|10751", sort_by: "vote_average.desc", "vote_count.gte": 2000 },
   },
   {
     months: [9],
-    label: "Spooky season",
     title: "Watch with the lights off",
     note: "Horror and thrillers for October.",
     params: { with_genres: "27|53", sort_by: "popularity.desc" },
   },
   {
     months: [10, 11],
-    label: "Holiday season",
     title: "Cozy movies for the holidays",
     note: "Christmas classics and new ones.",
     params: { with_keywords: "207317", sort_by: "popularity.desc", "vote_count.gte": 200 }, // 207317 = "christmas"

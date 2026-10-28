@@ -19,16 +19,25 @@ export default function Modal({ title, onClose, wide = false, children }) {
   }, [onClose]);
 
   return (
-    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    // the page behind stays visible but blurry, and the box is a glass sheet on top
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex animate-[fade_0.2s] items-center justify-center bg-black/45 p-4 backdrop-blur-md"
+    >
       {/* stopPropagation so clicks inside the box don't count as "outside" */}
       <div
         onClick={(event) => event.stopPropagation()}
-        className={`w-full rounded-2xl border border-line bg-panel p-5 ${wide ? "max-w-4xl" : "max-w-md"}`}
+        className={`glass-strong w-full rounded-3xl p-5 ${wide ? "max-w-4xl" : "max-w-md"}`}
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold">{title}</h2>
-          <button onClick={onClose} title="Close" className="text-muted hover:text-text">
-            <X size={22} />
+          <button
+            onClick={onClose}
+            title="Close"
+            aria-label="Close"
+            className="flex size-8 items-center justify-center rounded-full bg-white/10 text-muted transition-colors hover:bg-white/15 hover:text-text"
+          >
+            <X size={18} />
           </button>
         </div>
         {children}

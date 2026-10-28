@@ -18,7 +18,7 @@ export default function ContinueWatching() {
 
   return (
     <section className="mt-10">
-      <SectionTitle label="Your shows" title="Continue watching">
+      <SectionTitle title="Continue watching">
         <Link to="/up-next" className="text-sm font-semibold text-muted hover:text-text">
           See all
         </Link>

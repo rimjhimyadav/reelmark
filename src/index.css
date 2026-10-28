@@ -3,28 +3,60 @@
 /* all the colors of the app live here, so changing the theme later is easy */
 @theme {
   --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-display: "Big Shoulders Display Variable", "Inter Variable", sans-serif;
 
-  --color-page: #0a0e1f;
-  --color-panel: #11172e;
-  --color-panel-light: #19213f;
-  --color-line: #252e52;
+  /* deep ink navy, less blue than before, so the posters and the main color stand out more */
+  --color-page: #070a14;
+  --color-panel: #0e1322;
+  --color-panel-light: #161c30;
+  --color-line: #232a42;
 
   --color-text: #f4f4f5;
   --color-muted: #8f98ba;
 
-  /* main color (violet by default, you can change it in settings), and the text color that sits on top of it */
-  --color-accent: #7c5cff;
-  --color-accent-text: #ffffff;
+  /* main color (lavender by default, you can change it in settings), and the text color that sits on top of it */
+  --color-accent: #a78bfa;
+  --color-accent-text: #070a14;
 }
 
 body {
   background-color: var(--color-page);
   color: var(--color-text);
-  /* a soft glow in the main color at the top, so the page isn't flat black */
-  background-image:
-    radial-gradient(900px 500px at 15% -10%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%),
-    radial-gradient(700px 400px at 100% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 70%);
+  /* a soft glow in the main color in the top left corner, so the page isn't flat black.
+     kept faint: warm colors (like coral or orange) turn brown if there's too much of them on the navy */
+  background-image: radial-gradient(800px 450px at 10% -15%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 70%);
   background-attachment: fixed;
+}
+
+/* a very faint light edge on every panel (cards, tiles, the sidebar...),
+   so panels next to each other don't melt into one flat blue area.
+   inputs and selects already have a border, so they're skipped */
+.bg-panel:not(input, select) {
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+/* frosted glass, like the floating bars in ios. only use it on things that float over pictures,
+   over plain background there's nothing to blur and it just looks grey.
+   the light line along the top is the "light hitting the glass" edge */
+@utility glass {
+  background-color: color-mix(in srgb, var(--color-panel) 55%, transparent);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 10px 30px rgb(0 0 0 / 0.25);
+}
+
+/* the same glass, but less see-through, for popups with lots of text */
+@utility glass-strong {
+  background-color: color-mix(in srgb, var(--color-panel) 78%, transparent);
+  backdrop-filter: blur(32px) saturate(160%);
+  -webkit-backdrop-filter: blur(32px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 24px 60px rgb(0 0 0 / 0.45);
 }
 
 /* for sideways rows: still scrolls, but hides the ugly scrollbar */

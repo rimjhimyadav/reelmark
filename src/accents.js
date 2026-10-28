@@ -1,7 +1,7 @@
 // main colors you can pick in settings
 // "text" is the color of text that sits on top of the main color (like on buttons):
 // white on dark colors, dark navy on light ones so it's still easy to read
-const DARK = "#0a0e1f";
+const DARK = "#070a14";
 
 export const ACCENTS = [
   { key: "violet", label: "Violet", color: "#7c5cff", text: "#ffffff" },
@@ -26,10 +26,17 @@ export const ACCENTS = [
   { key: "snow", label: "Snow", color: "#f4f4f5", text: DARK },
 ];
 
+// lavender is the default: soft, and easy to read on the dark panels
+export const DEFAULT_ACCENT = "lavender";
+
+export function getAccent(key) {
+  return ACCENTS.find((item) => item.key === key) || ACCENTS.find((item) => item.key === DEFAULT_ACCENT);
+}
+
 // tailwind reads the main color from these css variables (see index.css),
 // so changing them recolors every button, bar and the glow behind the page
 export function applyAccent(key) {
-  const accent = ACCENTS.find((item) => item.key === key) || ACCENTS[0];
+  const accent = getAccent(key);
   document.documentElement.style.setProperty("--color-accent", accent.color);
   document.documentElement.style.setProperty("--color-accent-text", accent.text);
 }

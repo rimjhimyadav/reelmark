@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Check, Download, Trash2, Upload } from "lucide-react";
 import { useLibrary } from "../store/library";
 import { useSettings } from "../store/settings";
-import { ACCENTS } from "../accents";
+import { ACCENTS, getAccent } from "../accents";
 import { plural, todayString } from "../utils";
 import PageTitle from "../components/PageTitle";
 import Modal from "../components/Modal";
@@ -150,7 +150,7 @@ export default function Settings() {
 function AccentPicker() {
   const accent = useSettings((state) => state.accent);
   const setAccent = useSettings((state) => state.setAccent);
-  const current = ACCENTS.find((item) => item.key === accent) || ACCENTS[0];
+  const current = getAccent(accent);
 
   return (
     <section className="max-w-2xl rounded-2xl bg-panel p-6">

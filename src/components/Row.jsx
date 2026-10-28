@@ -13,7 +13,7 @@ export default function Row({ load, ...titleProps }) {
 
 // a title and a list of posters you can scroll sideways
 // items = null means it's still loading
-export function PosterRow({ label, title, note, items }) {
+export function PosterRow({ title, note, items }) {
   const listRef = useRef(null);
 
   function scroll(direction) {
@@ -24,7 +24,7 @@ export function PosterRow({ label, title, note, items }) {
 
   return (
     <section className="mt-10">
-      <SectionTitle label={label} title={title} note={note}>
+      <SectionTitle title={title} note={note}>
         <div className="hidden gap-2 md:flex">
           <button onClick={() => scroll(-1)} className="rounded-full bg-panel-light p-1.5 text-muted hover:text-text">
             <ChevronLeft size={18} />

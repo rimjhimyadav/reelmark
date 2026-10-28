@@ -74,36 +74,23 @@ export default function Library() {
     <>
       <PageTitle title="Library" text="Everything you track, in one place." />
 
-      <div className="flex rounded-xl bg-panel p-1 sm:inline-flex">
-        {TABS.map((item) => (
-          <button
-            key={item.key}
-            onClick={() => setTab(item.key)}
-            className={`flex-1 rounded-lg px-4 py-2 font-semibold transition-colors ${
-              tab === item.key ? "bg-accent text-accent-text" : "text-muted hover:text-text"
-            }`}
-          >
-            {item.label}
-            <span className="ml-1.5 text-xs opacity-60">{items.filter((x) => isInTab(x, item.key)).length}</span>
-          </button>
-        ))}
-      </div>
+      {/* one toolbar: type tabs, search, sort and grid/list. the status chips go under it */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full rounded-xl bg-panel p-1 lg:w-auto">
+          {TABS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setTab(item.key)}
+              className={`flex-1 rounded-lg px-3 py-1.5 font-semibold transition-colors sm:px-4 ${
+                tab === item.key ? "bg-accent text-accent-text" : "text-muted hover:text-text"
+              }`}
+            >
+              {item.label}
+              <span className="ml-1.5 text-xs font-normal">{items.filter((x) => isInTab(x, item.key)).length}</span>
+            </button>
+          ))}
+        </div>
 
-      <div className="no-scrollbar mt-5 flex gap-2 overflow-x-auto">
-        <StatusChip active={status === "all"} onClick={() => setStatus("all")} label="All" count={inTab.length} />
-        {STATUSES.map((item) => (
-          <StatusChip
-            key={item.key}
-            status={item}
-            active={status === item.key}
-            onClick={() => setStatus(item.key)}
-            label={item.label}
-            count={inTab.filter((x) => x.status === item.key).length}
-          />
-        ))}
-      </div>
-
-      <div className="mt-5 flex flex-wrap items-center gap-3">
         <div className="relative min-w-52 flex-1">
           <Search size={18} className="absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
           <input
@@ -117,6 +104,7 @@ export default function Library() {
         <select
           value={sort}
           onChange={(event) => setSort(event.target.value)}
+          aria-label="Sort by"
           className="rounded-lg border border-line bg-panel px-3 py-2 outline-none"
         >
           {SORTS.map((item) => (
@@ -130,6 +118,7 @@ export default function Library() {
           <button
             onClick={() => setView("grid")}
             title="Grid"
+            aria-label="Show as grid"
             className={`rounded-md p-1.5 ${view === "grid" ? "bg-panel-light" : "text-muted"}`}
           >
             <LayoutGrid size={18} />
@@ -137,11 +126,26 @@ export default function Library() {
           <button
             onClick={() => setView("list")}
             title="List"
+            aria-label="Show as list"
             className={`rounded-md p-1.5 ${view === "list" ? "bg-panel-light" : "text-muted"}`}
           >
             <List size={18} />
           </button>
         </div>
+      </div>
+
+      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
+        <StatusChip active={status === "all"} onClick={() => setStatus("all")} label="All" count={inTab.length} />
+        {STATUSES.map((item) => (
+          <StatusChip
+            key={item.key}
+            status={item}
+            active={status === item.key}
+            onClick={() => setStatus(item.key)}
+            label={item.label}
+            count={inTab.filter((x) => x.status === item.key).length}
+          />
+        ))}
       </div>
 
       {shown.length === 0 && <p className="mt-16 text-center text-muted">Nothing matches these filters.</p>}
@@ -175,7 +179,7 @@ function StatusChip({ status, active, onClick, label, count }) {
       }`}
     >
       {status && <status.icon size={15} className={status.text} />}
-      {label} <span className="opacity-60">{count}</span>
+      {label} <span className="text-muted">{count}</span>
     </button>
   );
 }
@@ -199,13 +203,6 @@ function GridCard({ item }) {
         >
           <status.icon size={15} strokeWidth={2.5} />
         </span>
-
-        {item.tmdbRating && (
-          <span className="absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-semibold backdrop-blur">
-            <Star size={11} className="fill-yellow-400 text-yellow-400" />
-            {item.tmdbRating}
-          </span>
-        )}
 
         {/* progress sits on the bottom edge of the poster, so every card stays the same height */}
         {progress && (
@@ -269,7 +266,8 @@ function ShowProgress({ item }) {
   );
 }
 
-// "2021 · ★ 4" (stars only if you rated it)
+// "2021 · ★ 4" (stars only if you rated it). this is your own rating,
+// the library doesn't show the TMDB score so the two don't get mixed up
 function MyStars({ rating, year }) {
   return (
     <p className="flex items-center gap-1 text-xs text-muted">

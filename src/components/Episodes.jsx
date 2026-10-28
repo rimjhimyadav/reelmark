@@ -20,7 +20,7 @@ export default function Episodes({ item }) {
 
   return (
     <section className="mb-10">
-      <SectionTitle label="Episodes" title="Track your progress" />
+      <SectionTitle title="Track your progress" />
 
       <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto">
         {item.seasons.map((s) => {
@@ -33,11 +33,11 @@ export default function Episodes({ item }) {
               key={s.number}
               onClick={() => setSeason(s.number)}
               className={`shrink-0 rounded-lg px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors ${
-                season === s.number ? "bg-accent text-accent-text" : "bg-panel text-muted hover:text-text"
+                season === s.number ? "bg-accent text-accent-text" : "glass text-muted hover:text-text"
               }`}
             >
               Season {s.number}
-              {watchedHere > 0 && <span className="ml-1.5 opacity-60">{watchedHere}/{s.episodes}</span>}
+              {watchedHere > 0 && <span className="ml-1.5 font-normal">{watchedHere}/{s.episodes}</span>}
             </button>
           );
         })}
@@ -57,7 +57,7 @@ function SeasonEpisodes({ item, season, watched }) {
   const [showAll, setShowAll] = useState(false);
 
   if (error) return <p className="text-muted">Couldn't load the episodes.</p>;
-  if (!episodes) return <div className="h-64 animate-pulse rounded-xl bg-panel" />;
+  if (!episodes) return <div className="glass h-64 animate-pulse rounded-xl" />;
 
   const today = todayString();
   const aired = episodes.filter((episode) => episode.airDate && episode.airDate <= today);
@@ -74,8 +74,8 @@ function SeasonEpisodes({ item, season, watched }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl bg-panel">
-      <div className="flex flex-wrap items-center gap-4 border-b border-line p-4">
+    <div className="glass overflow-hidden rounded-xl">
+      <div className="flex flex-wrap items-center gap-4 border-b border-white/10 p-4">
         <div className="min-w-40 flex-1">
           <div className="mb-2 flex justify-between text-sm">
             <span className="text-muted">
@@ -87,7 +87,7 @@ function SeasonEpisodes({ item, season, watched }) {
         </div>
 
         {aired.length > 0 && (
-          <button onClick={toggleSeason} className="rounded-lg bg-panel-light px-4 py-2 text-sm font-semibold hover:bg-line">
+          <button onClick={toggleSeason} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/15">
             {allWatched ? "Unmark season" : "Mark season watched"}
           </button>
         )}
@@ -100,7 +100,7 @@ function SeasonEpisodes({ item, season, watched }) {
         if (episode.airDate) airText = isOut ? formatDate(episode.airDate) : `Airs ${formatDate(episode.airDate)}`;
 
         return (
-          <div key={episode.number} className="flex items-center gap-4 border-b border-line/60 px-4 py-3 last:border-0">
+          <div key={episode.number} className="flex items-center gap-4 border-b border-white/5 px-4 py-3 last:border-0">
             <button
               onClick={() => setEpisodes(item, season, [episode.number], !isWatched)}
               disabled={!isOut}

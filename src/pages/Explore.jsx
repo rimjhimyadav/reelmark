@@ -25,10 +25,11 @@ function browseLink(filters) {
   return "/explore/all?" + new URLSearchParams(filters).toString();
 }
 
+// "load" gives the posters shown behind each tile
 const TYPES = [
-  { label: "Movies", icon: Clapperboard, filters: { type: "movie" } },
-  { label: "Shows", icon: Tv, filters: { type: "tv" } },
-  { label: "Anime", icon: Sparkles, filters: { type: "anime" } },
+  { label: "Movies", icon: Clapperboard, filters: { type: "movie" }, load: getTrendingMovies },
+  { label: "Shows", icon: Tv, filters: { type: "tv" }, load: getTrendingShows },
+  { label: "Anime", icon: Sparkles, filters: { type: "anime" }, load: getPopularAnime },
 ];
 
 // moods are just genre mixes. a comma means "has all of these genres"
@@ -62,32 +63,24 @@ export default function Explore() {
 
       <div className="grid grid-cols-3 gap-3">
         {TYPES.map((item) => (
-          <Link
-            key={item.label}
-            to={browseLink(item.filters)}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-panel py-5 font-bold transition-colors hover:bg-panel-light md:justify-start md:px-6"
-          >
-            <item.icon size={22} /> {item.label}
-            <ArrowRight size={18} className="ml-auto hidden text-muted md:block" />
-          </Link>
+          <TypeTile key={item.label} item={item} />
         ))}
       </div>
 
-      <Row label={season.label} title={season.title} note={season.note} load={getThisSeason} />
+      <Row title={season.title} note={season.note} load={getThisSeason} />
       <TopTen />
       <TrailerRow />
-      <Row label="Trending" title="Movies everyone's watching" load={getTrendingMovies} />
-      <Row label="Trending" title="Popular shows today" load={getTrendingShows} />
+      <Row title="Movies everyone's watching" load={getTrendingMovies} />
+      <Row title="Popular shows today" load={getTrendingShows} />
       <Row
-        label="Coming soon"
         title="New in theaters soon"
         note="Mark the ones you want to see."
         load={getComingSoon}
       />
-      <Row label="Anime" title="Popular anime right now" load={getPopularAnime} />
+      <Row title="Popular anime right now" load={getPopularAnime} />
       <Providers />
 
-      <Section label="Moods" title="What are you in the mood for?">
+      <Section title="What are you in the mood for?">
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
           {MOODS.map((mood) => (
             <Link
@@ -102,11 +95,11 @@ export default function Explore() {
         </div>
       </Section>
 
-      <Row label="Hidden gems" title="Great movies you might have missed" note="Loved by the people who found them." load={getHiddenGems} />
+      <Row title="Great movies you might have missed" note="Loved by the people who found them." load={getHiddenGems} />
 
       <GenreTiles />
 
-      <Section label="Time travel" title="Best of every decade">
+      <Section title="Best of every decade">
         <div className="no-scrollbar flex gap-3 overflow-x-auto">
           {DECADES.map((decade) => (
             <Link
@@ -123,10 +116,47 @@ export default function Explore() {
   );
 }
 
-function Section({ label, title, note, children }) {
+// a big tile with 3 posters fanned out on the right side
+function TypeTile({ item }) {
+  const { data } = useFetch(item.load);
+  const posters = data ? data.filter((result) => result.poster).slice(0, 3) : [];
+
+  return (
+    <Link
+      to={browseLink(item.filters)}
+      className="group relative flex h-16 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-panel font-bold transition-colors hover:bg-panel-light md:h-32 md:justify-start md:px-6 md:text-lg"
+    >
+      {/* only on bigger screens, on phones the tiles are too small for posters */}
+      <div className="absolute inset-y-0 right-0 hidden w-1/2 origin-right transition-transform duration-300 group-hover:scale-105 md:block" aria-hidden="true">
+        {posters.map((result, index) => (
+          <img
+            key={result.id}
+            src={imageUrl(result.poster, "w185")}
+            alt=""
+            className="absolute top-1/2 w-20 rounded-lg shadow-xl shadow-black/50"
+            style={{
+              right: `${12 + index * 44}px`,
+              transform: `translateY(-50%) rotate(${(index - 1) * -8}deg)`,
+              zIndex: 3 - index,
+            }}
+          />
+        ))}
+        {/* fade the posters into the tile so the text stays easy to read */}
+        <div className="absolute inset-0 bg-linear-to-r from-panel via-panel/40 to-transparent transition-colors group-hover:from-panel-light group-hover:via-panel-light/40" />
+      </div>
+
+      <span className="relative flex items-center gap-2">
+        <item.icon size={22} /> {item.label}
+        <ArrowRight size={18} className="hidden text-muted transition-transform group-hover:translate-x-1 md:block" />
+      </span>
+    </Link>
+  );
+}
+
+function Section({ title, note, children }) {
   return (
     <section className="mt-10">
-      <SectionTitle label={label} title={title} note={note} />
+      <SectionTitle title={title} note={note} />
       {children}
     </section>
   );
@@ -137,7 +167,7 @@ function Providers() {
   if (!providers) return null;
 
   return (
-    <Section label="Streaming" title="What's on your apps" note="Streaming in India right now.">
+    <Section title="What's on your apps" note="Streaming in India right now.">
       <div className="grid grid-cols-4 gap-3 md:grid-cols-8">
         {providers.map((provider) => (
           <Link
@@ -164,7 +194,7 @@ function TopTen() {
   if (!items) return null;
 
   return (
-    <Section label="Top 10" title="Most watched today" note="Movies and shows, updated every day.">
+    <Section title="Most watched today" note="Movies and shows, updated every day.">
       <div className="no-scrollbar flex gap-2 overflow-x-auto">
         {items.map((item, index) => (
           <Link key={item.id} to={`/${item.type}/${item.id}`} className="group flex shrink-0 items-end">
@@ -193,7 +223,7 @@ function GenreTiles() {
   if (!genres) return null;
 
   return (
-    <Section label="Genres" title="Browse by genre">
+    <Section title="Browse by genre">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {genres.map((genre, index) => (
           <Link

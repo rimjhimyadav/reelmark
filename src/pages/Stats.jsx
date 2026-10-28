@@ -11,7 +11,7 @@ import {
   topGenres,
   totalMinutes,
 } from "../stats";
-import { formatDate, plural } from "../utils";
+import { formatDate, formatRuntime, plural } from "../utils";
 import { Gift } from "lucide-react";
 import PageTitle from "../components/PageTitle";
 import SectionTitle from "../components/SectionTitle";
@@ -72,7 +72,7 @@ export default function Stats() {
       </div>
 
       <section className="rounded-2xl bg-panel p-6">
-        <p className="text-sm font-semibold tracking-widest text-muted uppercase">Time spent watching</p>
+        <h2 className="font-semibold text-muted">Time spent watching</h2>
         <div className="mt-3 flex flex-wrap items-end gap-6">
           <BigNumber value={time.days} label={time.days === 1 ? "day" : "days"} />
           <BigNumber value={time.hours} label={time.hours === 1 ? "hour" : "hours"} />
@@ -133,22 +133,23 @@ function Heatmap({ dayCounts }) {
 
   return (
     <section className="mt-4 rounded-2xl bg-panel p-6">
-      <SectionTitle label="Activity" title="Your last 12 months">
+      <SectionTitle title="Your last 12 months">
         <p className="text-sm text-muted">
           {hovered ? `${formatDate(hovered.key)} · ${plural(hovered.count, "thing")} watched` : "Hover or tap a day"}
         </p>
       </SectionTitle>
 
       <div ref={scrollRef} className="no-scrollbar overflow-x-auto" onMouseLeave={() => setHovered(null)}>
-        {/* 7 rows (sunday to saturday), new columns are added for every week */}
-        <div className="grid w-max grid-flow-col grid-rows-7 gap-1">
+        {/* 7 rows (sunday to saturday), new columns are added for every week.
+            auto-cols-fr makes the weeks share the whole width, so the boxes grow to fill the card */}
+        <div className="grid w-full min-w-160 auto-cols-fr grid-flow-col grid-rows-7 gap-1">
           {days.map((day) => (
             <div
               key={day.key}
               onMouseEnter={() => setHovered(day)}
               onClick={() => setHovered(day)}
               title={`${formatDate(day.key)}: ${day.count}`}
-              className={`size-3 rounded-[3px] ${boxColor(day.count)} ${
+              className={`aspect-square rounded-[3px] ${boxColor(day.count)} ${
                 hovered && hovered.key === day.key ? "ring-1 ring-text" : ""
               }`}
             />
@@ -167,29 +168,24 @@ function Heatmap({ dayCounts }) {
   );
 }
 
-// hours watched each month, as simple bars
+// hours watched each month, as simple bars with the time on top
 function MonthChart({ months }) {
-  const [hovered, setHovered] = useState(null);
-  const highest = Math.max(...months.map((month) => month.hours), 1);
+  const highest = Math.max(...months.map((month) => month.minutes), 1);
+  const monthsWithTime = months.filter((month) => month.minutes > 0).length;
 
   return (
     <section className="rounded-2xl bg-panel p-6">
-      <SectionTitle label="Time" title="Hours per month">
-        <p className="text-sm text-muted">{hovered ? `${hovered.label}: ${plural(hovered.hours, "hour")}` : ""}</p>
-      </SectionTitle>
+      <SectionTitle title="Hours per month" />
 
-      <div className="flex h-44 items-end gap-3 border-b border-line" onMouseLeave={() => setHovered(null)}>
+      <div className="flex h-44 items-end gap-3 border-b border-line">
         {months.map((month) => (
-          <div
-            key={month.key}
-            onMouseEnter={() => setHovered(month)}
-            className="flex h-full flex-1 flex-col justify-end"
-            title={`${month.label}: ${month.hours}h`}
-          >
+          <div key={month.key} className="flex h-full flex-1 flex-col items-center justify-end">
+            {month.minutes > 0 && <span className="mb-1 text-xs text-muted">{formatRuntime(month.minutes)}</span>}
             <div
-              className={`rounded-t-[4px] transition-colors ${hovered === month ? "bg-accent" : "bg-accent/70"}`}
+              // thin bars (max 48px), so one busy month doesn't look like a big block
+              className="w-full max-w-12 rounded-t-[4px] bg-accent/80"
               // at least 2px so an empty month is still visible
-              style={{ height: month.minutes > 0 ? `max(4px, ${(month.hours / highest) * 100}%)` : "2px" }}
+              style={{ height: month.minutes > 0 ? `max(4px, ${(month.minutes / highest) * 85}%)` : "2px" }}
             />
           </div>
         ))}
@@ -202,6 +198,8 @@ function MonthChart({ months }) {
           </span>
         ))}
       </div>
+
+      {monthsWithTime <= 1 && <p className="mt-4 text-sm text-muted">This chart fills in as you keep watching over the next months.</p>}
     </section>
   );
 }
@@ -211,7 +209,7 @@ function GenreList({ genres }) {
 
   return (
     <section className="rounded-2xl bg-panel p-6">
-      <SectionTitle label="Taste" title="Top genres" />
+      <SectionTitle title="Top genres" />
       <div className="flex flex-col gap-4">
         {genres.map((genre) => (
           <div key={genre.name}>

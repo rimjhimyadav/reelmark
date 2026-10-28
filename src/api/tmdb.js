@@ -10,18 +10,28 @@ const BASE_URL = "https://api.tmdb.org/3";
 const ANIMATION = 16;
 const KIDS = 10762;
 
-async function get(path, params = {}) {
+// answers we already got, so two parts of a page asking for the same thing only load it once
+// (like the explore tiles and the rows under them). it's cleared when you refresh the page
+const cache = {};
+
+function get(path, params = {}) {
   const url = new URL(BASE_URL + path);
   url.searchParams.set("api_key", API_KEY);
   for (const key in params) {
     url.searchParams.set(key, params[key]);
   }
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("TMDB request failed: " + response.status);
+  const key = url.toString();
+  if (!cache[key]) {
+    cache[key] = fetch(url).then((response) => {
+      if (!response.ok) {
+        delete cache[key]; // don't keep errors, so it can try again later
+        throw new Error("TMDB request failed: " + response.status);
+      }
+      return response.json();
+    });
   }
-  return response.json();
+  return cache[key];
 }
 
 // TMDB only gives the end of the image link, like "/abc.jpg"
@@ -242,24 +252,39 @@ export async function getLogo(type, id) {
   return savedLogos[key];
 }
 
+// some long anime (like naruto shippuden) number their episodes across the whole show,
+// so season 2 starts at E33 instead of E1. the app counts episodes inside each season (1, 2, 3...),
+// so this turns TMDB's number into "the how-manyth episode of this season"
+function episodeInSeason(episode, seasons) {
+  const season = seasons.find((s) => s.number === episode.season_number);
+  if (!season || episode.episode_number <= season.episodes) return episode.episode_number;
+
+  const before = seasons.filter((s) => s.number < season.number).reduce((sum, s) => sum + s.episodes, 0);
+  // a normal show can also have a new episode that isn't in the count yet, keep those as they are
+  if (episode.episode_number <= before) return episode.episode_number;
+  return Math.min(episode.episode_number - before, season.episodes);
+}
+
 // the parts of a show we need for episode tracking
 function showInfo(data) {
   const last = data.last_episode_to_air;
   const next = data.next_episode_to_air;
 
+  // season 0 is "specials", we skip it
+  const seasons = data.seasons
+    .filter((season) => season.season_number > 0)
+    .map((season) => ({
+      number: season.season_number,
+      name: season.name,
+      episodes: season.episode_count,
+      poster: season.poster_path,
+      airDate: season.air_date,
+    }));
+
   return {
-    // season 0 is "specials", we skip it
-    seasons: data.seasons
-      .filter((season) => season.season_number > 0)
-      .map((season) => ({
-        number: season.season_number,
-        name: season.name,
-        episodes: season.episode_count,
-        poster: season.poster_path,
-        airDate: season.air_date,
-      })),
-    lastAired: last ? { season: last.season_number, episode: last.episode_number } : null,
-    nextAir: next ? { season: next.season_number, episode: next.episode_number, date: next.air_date } : null,
+    seasons,
+    lastAired: last ? { season: last.season_number, episode: episodeInSeason(last, seasons) } : null,
+    nextAir: next ? { season: next.season_number, episode: episodeInSeason(next, seasons), date: next.air_date } : null,
     ended: data.status === "Ended" || data.status === "Canceled",
   };
 }
@@ -273,8 +298,10 @@ export async function getShowInfo(id) {
 // all episodes of one season
 export async function getSeason(showId, seasonNumber) {
   const data = await get(`/tv/${showId}/season/${seasonNumber}`);
-  return data.episodes.map((episode) => ({
-    number: episode.episode_number,
+  // "number" is the place in the season (1, 2, 3...), not TMDB's episode_number,
+  // because some anime keep counting from the last season (see episodeInSeason)
+  return data.episodes.map((episode, index) => ({
+    number: index + 1,
     name: episode.name,
     airDate: episode.air_date,
     runtime: episode.runtime,

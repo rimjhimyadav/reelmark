@@ -26,5 +26,5 @@ function Recommendations({ title, library }) {
   const fresh = data && data.filter((item) => !library[itemKey(item.type, item.id)]);
   if (fresh && fresh.length === 0) return null;
 
-  return <PosterRow label="For you" title={`Because you watched ${title.title}`} items={fresh} />;
+  return <PosterRow title={`Because you watched ${title.title}`} items={fresh} />;
 }

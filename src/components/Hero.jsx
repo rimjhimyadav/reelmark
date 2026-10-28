@@ -41,7 +41,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-linear-to-r from-page/80 to-transparent" />
 
       <div className="absolute inset-x-0 bottom-0 p-5 md:p-10">
-        <p className="text-xs font-semibold tracking-widest text-muted uppercase">#{current + 1} trending today</p>
+        <p className="text-sm font-semibold text-muted">#{current + 1} trending today</p>
         {/* key: start fresh for every slide, so we never show the logo of the last one */}
         <HeroTitle key={item.type + item.id} item={item} />
 
@@ -60,18 +60,20 @@ export default function Hero() {
 
         <Link
           to={`/${item.type}/${item.id}`}
-          className="mt-5 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-semibold text-accent-text hover:opacity-90"
+          className="glass mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-semibold transition-colors hover:bg-white/10"
         >
           <Info size={18} /> More info
         </Link>
 
-        <div className="no-scrollbar mt-6 flex gap-3 overflow-x-auto">
+        {/* the thumbnails sit in a glass tray, like the dock on an iphone */}
+        <div className="glass no-scrollbar mt-6 flex w-fit max-w-full gap-2 overflow-x-auto rounded-2xl p-2">
           {items.map((thumb, index) => (
             <button
               key={thumb.id}
               onClick={() => setCurrent(index)}
-              className={`w-28 shrink-0 overflow-hidden rounded-lg border-2 transition md:w-36 ${
-                index === current ? "border-text" : "border-transparent opacity-50 hover:opacity-100"
+              aria-label={`Show ${thumb.title}`}
+              className={`w-28 shrink-0 overflow-hidden rounded-xl border-2 transition md:w-32 ${
+                index === current ? "border-white/80" : "border-transparent opacity-60 hover:opacity-100"
               }`}
             >
               <img src={imageUrl(thumb.backdrop, "w300")} alt={thumb.title} className="aspect-video w-full object-cover" />
@@ -103,5 +105,5 @@ function HeroTitle({ item }) {
     );
   }
 
-  return <h1 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">{item.title}</h1>;
+  return <h1 className="mt-2 max-w-2xl font-display text-4xl font-extrabold tracking-wide md:text-6xl">{item.title}</h1>;
 }

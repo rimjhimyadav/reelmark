@@ -107,7 +107,7 @@ export default function TonightPicker() {
                 <Link
                   to={`/${pick.type}/${pick.id}`}
                   onClick={() => setOpen(false)}
-                  className="mt-4 flex items-center gap-4 rounded-xl bg-page/50 p-3 hover:bg-panel-light"
+                  className="mt-4 flex items-center gap-4 rounded-xl bg-white/5 p-3 hover:bg-white/10"
                 >
                   <img src={imageUrl(pick.poster, "w185")} alt="" className="w-16 rounded-lg" />
                   <span>
@@ -134,7 +134,7 @@ function Choices({ options, value, onChange }) {
           key={option.key}
           onClick={() => onChange(option.key)}
           className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-            value === option.key ? "border-text bg-panel-light text-text" : "border-line text-muted hover:text-text"
+            value === option.key ? "border-text bg-white/10 text-text" : "border-white/10 text-muted hover:text-text"
           }`}
         >
           {option.label}

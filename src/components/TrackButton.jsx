@@ -29,7 +29,7 @@ export default function TrackButton({ item }) {
       {current ? (
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg border border-text/30 px-5 py-2.5 font-semibold hover:bg-panel-light"
+          className="glass inline-flex items-center gap-2 rounded-lg px-5 py-2.5 font-semibold transition-colors hover:bg-white/10"
         >
           <current.icon size={18} className={current.text} /> {current.label}{" "}
           <ChevronDown size={16} className="text-muted" />
@@ -52,8 +52,8 @@ export default function TrackButton({ item }) {
                 onClick={() => pick(status.key)}
                 className={`flex items-center gap-4 rounded-xl border p-3 text-left transition-colors ${
                   saved && saved.status === status.key
-                    ? "border-text/40 bg-panel-light"
-                    : "border-transparent bg-page/40 hover:bg-panel-light"
+                    ? "border-text/40 bg-white/10"
+                    : "border-transparent bg-white/5 hover:bg-white/10"
                 }`}
               >
                 <status.icon size={20} className={status.text} />

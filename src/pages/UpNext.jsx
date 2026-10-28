@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router";
-import { Check, Info } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { getSeason, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
 import useRefreshShows from "../hooks/useRefreshShows";
@@ -76,13 +76,22 @@ export default function UpNext() {
         </div>
       )}
 
-      {/* as many ~260px cards as fit in a row, so they don't get huge on big screens */}
+      {/* as many ~300px cards as fit in a row, so they don't get huge on big screens */}
       {ready.length > 0 && (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-x-5 gap-y-8">
           {/* the key has the season in it, so the card starts fresh when you move to a new season */}
           {ready.map((show) => (
             <NextEpisodeCard key={show.id + "-" + getNextEpisode(show).season} show={show} />
           ))}
+
+          {/* last spot in the grid: a shortcut to find something new, so the page doesn't end in empty space */}
+          <Link
+            to="/explore"
+            className="flex aspect-video flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line text-muted transition-colors hover:border-muted hover:text-text"
+          >
+            <Plus size={24} />
+            <span className="font-semibold">Find another show</span>
+          </Link>
         </div>
       )}
 
@@ -138,52 +147,48 @@ function NextEpisodeCard({ show }) {
   const picture = episode && episode.still ? imageUrl(episode.still, "w780") : imageUrl(show.backdrop, "w780");
 
   return (
-    <div className="group relative aspect-video overflow-hidden rounded-xl bg-panel">
-      {picture && (
-        <img
-          src={picture}
-          alt=""
-          className={`absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-            hideSpoilers ? "spoiler" : ""
-          }`}
-        />
-      )}
-      {/* dark fade at the bottom so the text is readable on any picture */}
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
+    <div>
+      <Link to={`/tv/${show.id}`} className="group relative block aspect-video overflow-hidden rounded-xl bg-panel">
+        {picture && (
+          <img
+            src={picture}
+            alt=""
+            className={`absolute inset-0 size-full object-cover transition-transform duration-300 group-hover:scale-105 ${
+              hideSpoilers ? "spoiler" : ""
+            }`}
+          />
+        )}
 
-      <Link
-        to={`/tv/${show.id}`}
-        title="Show details"
-        className="absolute top-2 right-2 rounded-full bg-black/50 p-1.5 text-white/80 backdrop-blur hover:text-white"
-      >
-        <Info size={16} />
+        {/* thin progress line along the bottom edge */}
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-black/50">
+          <div className="h-full bg-accent" style={{ width: `${progress.percent}%` }} />
+        </div>
       </Link>
 
-      <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 p-3">
+      {/* the text sits under the picture, so it has room and is easy to read on any picture */}
+      <div className="mt-3 flex items-start gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-bold text-white">{show.title}</h3>
-          <p className="truncate text-sm text-white/80">
+          <Link to={`/tv/${show.id}`} className="block truncate font-bold hover:underline">
+            {show.title}
+          </Link>
+          <p className="truncate text-sm text-muted">
             <span className="font-semibold text-accent">{episodeLabel(next.season, next.episode)}</span>
             {episode && " · "}
             {episode && <span className={hideSpoilers ? "spoiler" : ""}>{episode.name}</span>}
           </p>
-          <span className="mt-1.5 inline-block rounded-full bg-black/50 px-2 py-0.5 text-[11px] text-white/90 backdrop-blur">
+          <p className="mt-0.5 text-sm text-muted">
             {left.episodes} left · {formatRuntime(left.minutes)}
-          </span>
+          </p>
         </div>
 
         <button
           onClick={() => setEpisodes(show, next.season, [next.episode], true)}
           title="Mark as watched"
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
+          aria-label={`Mark ${episodeLabel(next.season, next.episode)} of ${show.title} as watched`}
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
         >
           <Check size={18} strokeWidth={3} />
         </button>
-      </div>
-
-      {/* thin progress line along the bottom edge */}
-      <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
-        <div className="h-full bg-accent" style={{ width: `${progress.percent}%` }} />
       </div>
     </div>
   );
