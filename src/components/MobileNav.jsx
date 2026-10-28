@@ -9,7 +9,7 @@ const topLinks = links.filter((link) => link.mobile === false);
 export default function MobileNav() {
   return (
     <>
-      <header className="glass sticky top-0 z-20 flex items-center justify-between px-4 py-3 md:hidden">
+      <header className="glass sticky top-0 z-20 [--glass-fill:85%] flex items-center justify-between px-4 py-3 md:hidden">
         <Logo />
         <div className="flex gap-1">
           {topLinks.map((link) => (
@@ -26,7 +26,7 @@ export default function MobileNav() {
       </header>
 
       {/* floats a bit above the bottom edge (and above the iphone home bar), so posters scroll behind it */}
-      <nav className="glass fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-20 grid grid-cols-5 gap-1 rounded-[28px] p-1.5 md:hidden">
+      <nav className="glass fixed inset-x-3 [--glass-fill:85%] bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-20 grid grid-cols-5 gap-1 rounded-[28px] p-1.5 md:hidden">
         {bottomLinks.map((link) => (
           <NavLink
             key={link.to}
