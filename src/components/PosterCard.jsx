@@ -1,11 +1,23 @@
 import { Link } from "react-router";
 import { Star } from "lucide-react";
+import { useState } from "react";
 import { imageUrl } from "../api/tmdb";
+import { getPosterColor } from "../posterColor";
 
 export default function PosterCard({ item }) {
+  // the poster's own color, only worked out the first time you hover (so long rows stay fast)
+  const [glow, setGlow] = useState(null);
+
+  function handleHover() {
+    if (!glow) getPosterColor(item.poster).then((color) => color && setGlow(color));
+  }
+
   return (
-    <Link to={`/${item.type}/${item.id}`} className="group block">
-      <div className="relative aspect-2/3 overflow-hidden rounded-xl bg-panel-light">
+    <Link to={`/${item.type}/${item.id}`} className="group block" onMouseEnter={handleHover}>
+      <div
+        className="relative aspect-2/3 overflow-hidden rounded-xl bg-panel-light transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_-10px_var(--card-glow)]"
+        style={{ "--card-glow": glow || "var(--color-accent)" }}
+      >
         {item.poster ? (
           <img
             src={imageUrl(item.poster, "w342")}

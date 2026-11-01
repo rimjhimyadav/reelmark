@@ -1,7 +1,7 @@
 // main colors you can pick in settings
 // "text" is the color of text that sits on top of the main color (like on buttons):
 // white on dark colors, dark navy on light ones so it's still easy to read
-const DARK = "#070a14";
+const DARK = "#09090b";
 
 export const ACCENTS = [
   { key: "violet", label: "Violet", color: "#7c5cff", text: "#ffffff" },
