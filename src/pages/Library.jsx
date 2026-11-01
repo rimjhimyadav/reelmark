@@ -85,7 +85,7 @@ export default function Library() {
               <button
                 key={item.key}
                 onClick={() => setTab(item.key)}
-                className={`flex h-full flex-1 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+                className={`flex h-full min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-sm font-semibold transition-colors sm:gap-2 sm:px-4 ${
                   active ? "bg-white text-page shadow-[0_4px_14px_rgb(255_255_255/0.15)]" : "text-text/70 hover:bg-white/10 hover:text-text"
                 }`}
               >

@@ -52,8 +52,10 @@ body {
 
 /* "bleed": pulls a big picture out of the page padding so it touches both screen edges and the very top
    (the 50% - 50vw trick works even when the page is centered on very wide screens).
-   html clips the sideways overflow the scrollbar would cause */
-html {
+   html clips the sideways overflow the scrollbar would cause.
+   body clips too: phones (chrome on android) still let you drag the page sideways when only html clips */
+html,
+body {
   overflow-x: clip;
 }
 
