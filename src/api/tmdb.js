@@ -34,6 +34,13 @@ function get(path, params = {}) {
   return cache[key];
 }
 
+// for the big edge-to-edge pictures: lets the browser pick the smallest size that still looks sharp
+// (a phone loads the 780px one, ~100 KB, instead of the original, which can be 2-3 MB)
+export function backdropSrcSet(path) {
+  if (!path) return undefined;
+  return `${imageUrl(path, "w780")} 780w, ${imageUrl(path, "w1280")} 1280w, ${imageUrl(path, "original")} 2560w`;
+}
+
 // TMDB only gives the end of the image link, like "/abc.jpg"
 // size can be w185, w342, w500, w780, w1280 or original
 export function imageUrl(path, size = "w500") {
@@ -357,4 +364,9 @@ export async function getDetails(type, id) {
     })),
     imdbId: data.external_ids.imdb_id,
   };
+}
+
+// other sites' ids for a title (imdb, tvdb...), used to find the show on TVmaze for air times
+export async function getExternalIds(type, id) {
+  return get(`/${type}/${id}/external_ids`);
 }

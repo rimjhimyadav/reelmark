@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router";
 import { links } from "../links";
 import Logo from "./Logo";
@@ -7,9 +8,25 @@ const topLinks = links.filter((link) => link.mobile === false);
 
 // on phones: logo + small icons on top, main pages at the bottom
 export default function MobileNav() {
+  // the top bar floats see-through over the big pictures, and turns into glass once you scroll
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 24);
+    }
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
-      <header className="glass sticky top-0 z-20 [--glass-fill:85%] flex items-center justify-between px-4 py-3 md:hidden">
+      <header
+        className={`fixed inset-x-0 top-0 z-30 flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 transition-colors duration-300 md:hidden ${
+          scrolled ? "glass [--glass-fill:80%]" : "bg-linear-to-b from-black/50 to-transparent"
+        }`}
+      >
         <Logo />
         <div className="flex gap-1">
           {topLinks.map((link) => (
@@ -17,9 +34,11 @@ export default function MobileNav() {
               key={link.to}
               to={link.to}
               title={link.label}
-              className={({ isActive }) => `rounded-lg p-2 ${isActive ? "bg-panel-light text-text" : "text-muted"}`}
+              className={({ isActive }) =>
+                `flex size-10 items-center justify-center rounded-full transition-colors ${isActive ? "bg-white text-page" : "bg-black/25 text-text/85 backdrop-blur"}`
+              }
             >
-              <link.icon size={20} />
+              <link.icon size={18} />
             </NavLink>
           ))}
         </div>
@@ -34,7 +53,7 @@ export default function MobileNav() {
             end={link.to === "/"}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 rounded-[22px] py-2 text-xs font-medium transition-colors ${
-                isActive ? "bg-white/10 text-text" : "text-muted"
+                isActive ? "bg-white text-page" : "text-muted"
               }`
             }
           >

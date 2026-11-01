@@ -47,7 +47,7 @@ function StartTracking() {
         </p>
       </div>
       <div className="flex shrink-0 gap-3 md:ml-auto">
-        <Link to="/search" className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-semibold text-accent-text">
+        <Link to="/search" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 font-semibold text-page">
           <Search size={18} /> Search
         </Link>
         <Link to="/explore" className="inline-flex items-center gap-2 rounded-lg bg-panel-light px-4 py-2.5 font-semibold hover:bg-line">

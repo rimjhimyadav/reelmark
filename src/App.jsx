@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
-import Sidebar from "./components/Sidebar";
+import TopBar from "./components/TopBar";
+import Aurora from "./components/Aurora";
 import MobileNav from "./components/MobileNav";
 import { useSettings } from "./store/settings";
 import { applyAccent } from "./accents";
@@ -20,7 +21,6 @@ import NotFound from "./pages/NotFound";
 export default function App() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const sidebarCollapsed = useSettings((state) => state.sidebarCollapsed);
   const accent = useSettings((state) => state.accent);
 
   // the main color you picked in settings
@@ -47,15 +47,14 @@ export default function App() {
 
   return (
     <>
-      <Sidebar />
+      <Aurora />
+      <TopBar />
       <MobileNav />
 
-      {/* left padding leaves space for the sidebar, bottom padding for the bottom bar on phones */}
-      <main
-        className={`px-4 pt-6 pb-24 transition-[padding] md:pr-8 md:pt-8 md:pb-12 ${
-          sidebarCollapsed ? "md:pl-28" : "md:pl-68"
-        }`}
-      >
+      {/* the padding is kept in css variables, so big pictures (the home banner, the details header)
+          can use "bleed" to cancel it and go edge to edge. top padding leaves space for the top bar,
+          bottom padding for the bottom bar on phones */}
+      <main className="mx-auto max-w-[1800px] px-(--page-x) pt-(--page-top) pb-24 [--page-top:5rem] [--page-x:1rem] md:pb-12 md:[--page-top:7rem] md:[--page-x:2.5rem]">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/explore" element={<Explore />} />

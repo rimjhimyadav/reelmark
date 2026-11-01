@@ -1,6 +1,6 @@
 import { CalendarDays, ChartColumn, Compass, House, LibraryBig, ListVideo, Search, Settings } from "lucide-react";
 
-// pages shown in the sidebar (desktop) and the bottom bar (mobile)
+// pages shown in the top bar (desktop) and the bottom bar (mobile)
 // "mobile: false" means it doesn't fit in the bottom bar, so it goes in the top bar instead
 export const links = [
   { to: "/", label: "Home", icon: House },

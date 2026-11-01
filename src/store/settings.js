@@ -6,9 +6,6 @@ import { DEFAULT_ACCENT } from "../accents";
 export const useSettings = create(
   persist(
     (set) => ({
-      sidebarCollapsed: false,
-      toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
-
       accent: DEFAULT_ACCENT,
       setAccent: (accent) => set({ accent }),
 

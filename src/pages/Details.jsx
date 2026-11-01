@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ExternalLink, Play, Star } from "lucide-react";
-import { getDetails, imageUrl } from "../api/tmdb";
+import { backdropSrcSet, getDetails, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
+import { useAmbientColor } from "../hooks/usePosterColor";
 import { formatDate, formatRuntime, plural } from "../utils";
 import { itemKey, useLibrary } from "../store/library";
 import StarRating from "../components/StarRating";
@@ -24,6 +25,9 @@ function Details({ type, id }) {
   const { data: item, error } = useFetch(loadDetails);
   const [showTrailer, setShowTrailer] = useState(false);
   const updateShowInfo = useLibrary((state) => state.updateShowInfo);
+  // the page glows in the poster's color, and the poster, genres and buttons pick it up too
+  const ambient = useAmbientColor(item ? item.poster || item.backdrop : null);
+  const tint = ambient || "var(--color-accent)";
 
   // if you track this title, save the newest info (a new season may be out, the score changes)
   useEffect(() => {
@@ -60,27 +64,37 @@ function Details({ type, id }) {
           it gives the glass panels below some color to blur (a plain blur filter, so it stays fast) */}
       {item.backdrop && (
         <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden="true">
-          <img src={imageUrl(item.backdrop, "w780")} alt="" className="size-full scale-110 object-cover opacity-50 blur-3xl" />
-          <div className="absolute inset-0 bg-page/55" />
+          <img src={imageUrl(item.backdrop, "w780")} alt="" className="size-full scale-125 object-cover opacity-70 blur-[80px] saturate-150" />
+          <div className="absolute inset-0 bg-linear-to-b from-page/30 via-page/55 to-page/80" />
         </div>
       )}
 
       {/* wide image on top, it fades out at the bottom into the blurry one */}
-      <div className="relative h-56 overflow-hidden rounded-2xl [mask-image:linear-gradient(to_bottom,black_45%,transparent)] md:h-96">
+      <div className="bleed relative h-[45vh] min-h-72 overflow-hidden [mask-image:linear-gradient(to_bottom,black_50%,transparent)] md:h-[75vh]">
         {item.backdrop && (
-          <img src={imageUrl(item.backdrop, "w1280")} alt="" className="size-full object-cover opacity-70" />
+          <img
+            src={imageUrl(item.backdrop, "w1280")}
+            srcSet={backdropSrcSet(item.backdrop)}
+            sizes="100vw"
+            alt=""
+            className="size-full object-cover object-[center_25%] opacity-85"
+          />
         )}
+        <div className="absolute inset-0 bg-linear-to-r from-page/70 via-transparent to-transparent" />
       </div>
 
-      <div className="relative -mt-24 flex flex-col gap-6 px-2 md:-mt-40 md:flex-row md:gap-10 md:px-8">
+      <div
+        className="relative -mt-28 flex flex-col gap-6 px-2 md:-mt-[30vh] md:flex-row md:gap-10 md:px-4"
+        style={{ "--tint": tint }}
+      >
         <img
           src={imageUrl(item.poster, "w500")}
           alt={item.title}
-          className="w-36 shrink-0 self-start rounded-xl shadow-2xl md:w-60"
+          className="w-36 shrink-0 self-start rounded-xl shadow-[0_20px_90px_-8px_var(--tint)] ring-1 ring-white/10 transition-shadow duration-1000 md:w-60"
         />
 
-        <div className="md:pt-24">
-          <h1 className="font-display text-4xl font-extrabold tracking-wide md:text-6xl">{item.title}</h1>
+        <div className="md:pt-[12vh]">
+          <h1 className="font-display text-5xl font-extrabold tracking-wide uppercase drop-shadow-[0_4px_20px_rgb(0_0_0/0.6)] md:text-7xl">{item.title}</h1>
           {item.tagline && <p className="mt-2 text-muted italic">{item.tagline}</p>}
 
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
@@ -97,7 +111,7 @@ function Details({ type, id }) {
 
           <div className="mt-4 flex flex-wrap gap-2">
             {item.genres.map((genre) => (
-              <span key={genre} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-text/80">
+              <span key={genre} className="rounded-full border border-(color:--tint)/40 bg-(color:--tint)/15 px-3 py-1 text-xs font-medium text-text/90">
                 {genre}
               </span>
             ))}
