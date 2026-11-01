@@ -8,18 +8,18 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 
 ## Features
 
-- **Home** is all about you: continue watching, new episodes from your shows this week, "because you watched..." picks, and a **what should I watch tonight?** picker that chooses from your Plan to watch list by mood and time. The banner on top shows each title's real logo
+- **Home** is all about you: continue watching, new episodes from your shows this week, "because you watched..." picks, and a **what should I watch tonight?** picker that chooses from your Plan to watch list by mood and time. The banner on top is full screen, shows each title's real logo, and the whole page takes the colors of the movie on screen
 - **Explore** has a row that changes with the month (spooky in October, cozy in December...), the newest trailers, top 10 today, coming soon with a countdown, streaming apps in India (Netflix, Prime Video, JioHotstar...), moods, genres, hidden gems and decades, plus a "see all" grid with filters and infinite scroll
 - **Search** everything at once, open it from anywhere with `Ctrl + K`
 - **Details page** with trailer, cast, reviews, where to watch in India, an IMDb link and similar titles
 - **Track** anything as Watching, Plan to watch, Completed, On hold, Dropped or Rewatching (each with its own color), and rate it out of 5
-- **Episode tracking** per season. A show moves to Completed by itself when you finish the last episode
+- **Episode tracking** per season, with episode pictures you scroll through and a season picker. It opens at your next episode. A show moves to Completed by itself when you finish the last episode
 - **Spoiler mode** blurs names and pictures of episodes you haven't seen
 - **Up Next** shows the next episode of every show you're watching, sorted how you like, with how many episodes and hours are left
-- **Calendar** with new episodes and movie releases from your library, click a day to see just that day
+- **Calendar** with new episodes and movie releases from your library, with the exact air time in your timezone. Click a day to see just that day
 - **Stats**: total watch time, streaks, a 12 month activity heatmap, hours per month and top genres
 - **Wrapped**: a "your year in watching" card you can download as a picture
-- **Settings**: pick the main color of the app (18 colors), spoiler mode, and export or import your library (it's all saved in your browser)
+- **Settings**: pick the main color of the app (18 colors, the background changes with it too), spoiler mode, and export or import your library (it's all saved in your browser)
 
 | Episodes | Up Next |
 | --- | --- |
@@ -41,6 +41,7 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 - Zustand (the library is saved to localStorage with its `persist` middleware)
 - html-to-image for the wrapped picture
 - [TMDB API](https://developer.themoviedb.org/docs) for all movie and show data
+- [TVmaze API](https://www.tvmaze.com/api) for episode air times
 
 ## Run it locally
 
@@ -54,4 +55,4 @@ npm run dev
 
 ## Credits
 
-This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming info comes from JustWatch.
+This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming info comes from JustWatch, air times from TVmaze.
