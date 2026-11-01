@@ -43,7 +43,7 @@ export default function Wrapped() {
       </Link>
 
       {summary.titles === 0 ? (
-        <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center [--glass-fill:50%]">
           <h2 className="text-lg font-semibold">Nothing to wrap yet</h2>
           <p className="mt-1 text-muted">Watch a few things in {year} and your card shows up here.</p>
         </div>
@@ -107,7 +107,7 @@ export default function Wrapped() {
           <button
             onClick={download}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-semibold text-accent-text hover:opacity-90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-page hover:opacity-90 disabled:opacity-60"
           >
             <Download size={18} /> {saving ? "Saving..." : "Download picture"}
           </button>

@@ -73,7 +73,7 @@ export default function Settings() {
           <button
             onClick={exportLibrary}
             disabled={count === 0}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 font-semibold text-accent-text hover:opacity-90 disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 font-semibold text-page hover:opacity-90 disabled:opacity-40"
           >
             <Download size={18} /> Export backup
           </button>
@@ -121,7 +121,7 @@ export default function Settings() {
             <button onClick={() => setPendingImport(null)} className="rounded-lg px-4 py-2 font-semibold text-muted hover:text-text">
               Cancel
             </button>
-            <button onClick={finishImport} className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-text">
+            <button onClick={finishImport} className="rounded-full bg-white px-4 py-2 font-semibold text-page">
               Import
             </button>
           </div>

@@ -37,7 +37,7 @@ export default function TrackButton({ item }) {
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 font-semibold text-accent-text hover:opacity-90"
+          className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-page transition hover:-translate-y-0.5 hover:bg-white/90"
         >
           <Plus size={18} /> Track
         </button>

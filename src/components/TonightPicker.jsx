@@ -94,7 +94,7 @@ export default function TonightPicker() {
 
               <button
                 onClick={pickSomething}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-accent py-3 font-bold text-accent-text hover:opacity-90"
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 font-bold text-page hover:opacity-90"
               >
                 <Dices size={20} /> {pick ? "Pick another" : "Pick for me"}
               </button>

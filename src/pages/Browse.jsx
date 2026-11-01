@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { discover, getGenres, getProviders } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
+import { CalendarDays, Tv } from "lucide-react";
 import PageTitle from "../components/PageTitle";
+import Dropdown from "../components/Dropdown";
 import PosterCard, { PosterSkeleton } from "../components/PosterCard";
 
 const TYPES = [
@@ -49,13 +51,14 @@ export default function Browse() {
       <PageTitle title={name || typeLabel} text="Find something new to watch." />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex rounded-xl bg-panel p-1">
+        {/* same pills as the library toolbar: glass, 44px high, white when picked */}
+        <div className="glass flex h-11 items-center gap-1 rounded-full p-1 [--glass-fill:55%]">
           {TYPES.map((item) => (
             <button
               key={item.key}
               onClick={() => changeFilter("type", item.key)}
-              className={`rounded-lg px-5 py-2 font-semibold transition-colors ${
-                type === item.key ? "bg-accent text-accent-text" : "text-muted hover:text-text"
+              className={`h-full rounded-full px-5 text-sm font-semibold transition-colors ${
+                type === item.key ? "bg-white text-page shadow-[0_4px_14px_rgb(255_255_255/0.15)]" : "text-text/70 hover:bg-white/10 hover:text-text"
               }`}
             >
               {item.label}
@@ -63,13 +66,13 @@ export default function Browse() {
           ))}
         </div>
 
-        <div className="flex gap-1">
+        <div className="glass flex h-11 items-center gap-1 rounded-full p-1 [--glass-fill:55%]">
           {SORTS.map((item) => (
             <button
               key={item.key}
               onClick={() => changeFilter("sort", item.key)}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                sort === item.key ? "bg-panel-light text-text" : "text-muted hover:text-text"
+              className={`h-full rounded-full px-4 text-sm font-semibold transition-colors ${
+                sort === item.key ? "bg-white/15 text-text" : "text-text/60 hover:bg-white/10 hover:text-text"
               }`}
             >
               {item.label}
@@ -80,18 +83,13 @@ export default function Browse() {
 
       <div className="mt-4 flex flex-wrap gap-3">
         <ProviderSelect provider={provider} onChange={(id) => changeFilter("provider", id)} />
-        <select
+        <Dropdown
           value={decade}
-          onChange={(event) => changeFilter("decade", event.target.value)}
-          className="rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none"
-        >
-          <option value="">Any year</option>
-          {DECADES.map((item) => (
-            <option key={item} value={item}>
-              {item}s
-            </option>
-          ))}
-        </select>
+          onChange={(value) => changeFilter("decade", value)}
+          options={[{ value: "", label: "Any year" }, ...DECADES.map((item) => ({ value: String(item), label: `${item}s` }))]}
+          icon={CalendarDays}
+          label="Decade"
+        />
       </div>
 
       <GenreChips type={type} genre={genre} onChange={(id) => changeFilter("genre", id)} />
@@ -112,19 +110,16 @@ export default function Browse() {
 function ProviderSelect({ provider, onChange }) {
   const { data: providers } = useFetch(getProviders);
   return (
-    <select
+    <Dropdown
       value={provider}
-      onChange={(event) => onChange(event.target.value)}
-      className="rounded-lg border border-line bg-panel px-3 py-2 text-sm outline-none"
-    >
-      <option value="">All streaming services</option>
-      {providers &&
-        providers.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.name}
-          </option>
-        ))}
-    </select>
+      onChange={onChange}
+      options={[
+        { value: "", label: "All streaming services" },
+        ...(providers || []).map((item) => ({ value: String(item.id), label: item.name })),
+      ]}
+      icon={Tv}
+      label="Streaming service"
+    />
   );
 }
 
@@ -151,8 +146,8 @@ function Chip({ active, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-4 py-1.5 text-sm whitespace-nowrap transition-colors ${
-        active ? "border-text bg-text text-page" : "border-line text-muted hover:border-muted hover:text-text"
+      className={`h-9 shrink-0 rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors ${
+        active ? "bg-white text-page" : "glass text-text/75 [--glass-fill:45%] hover:bg-white/10 hover:text-text"
       }`}
     >
       {children}

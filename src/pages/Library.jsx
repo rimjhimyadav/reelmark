@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { LayoutGrid, List, Search, Star } from "lucide-react";
+import { ArrowDownUp, LayoutGrid, List, Search, Star, X } from "lucide-react";
 import { imageUrl } from "../api/tmdb";
 import { useLibrary } from "../store/library";
 import { STATUSES, getStatus } from "../statuses";
 import { episodeLabel, getNextEpisode, getProgress } from "../progress";
 import PageTitle from "../components/PageTitle";
 import ProgressBar from "../components/ProgressBar";
+import Dropdown from "../components/Dropdown";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -51,10 +52,10 @@ export default function Library() {
     return (
       <>
         <PageTitle title="Library" text="Everything you track, in one place." />
-        <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center [--glass-fill:50%]">
           <h2 className="text-lg font-semibold">Your library is empty</h2>
           <p className="mt-1 text-muted">Open any movie or show and press Track to add it here.</p>
-          <Link to="/explore" className="mt-5 inline-block rounded-lg bg-accent px-5 py-2.5 font-semibold text-accent-text">
+          <Link to="/explore" className="mt-5 inline-block rounded-full bg-white px-5 py-2.5 font-semibold text-page">
             Find something to watch
           </Link>
         </div>
@@ -74,67 +75,72 @@ export default function Library() {
     <>
       <PageTitle title="Library" text="Everything you track, in one place." />
 
-      {/* one toolbar: type tabs, search, sort and grid/list. the status chips go under it */}
+      {/* one toolbar: type tabs, search, sort and grid/list. the status chips go under it.
+          everything is the same height (h-11), a pill, and the same glass, with white for what's picked */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex w-full rounded-xl bg-panel p-1 lg:w-auto">
-          {TABS.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setTab(item.key)}
-              className={`flex-1 rounded-lg px-3 py-1.5 font-semibold transition-colors sm:px-4 ${
-                tab === item.key ? "bg-accent text-accent-text" : "text-muted hover:text-text"
-              }`}
-            >
-              {item.label}
-              <span className="ml-1.5 text-xs font-normal">{items.filter((x) => isInTab(x, item.key)).length}</span>
-            </button>
-          ))}
+        <div className="glass flex h-11 w-full items-center gap-1 rounded-full p-1 [--glass-fill:55%] lg:w-auto">
+          {TABS.map((item) => {
+            const active = tab === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => setTab(item.key)}
+                className={`flex h-full flex-1 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+                  active ? "bg-white text-page shadow-[0_4px_14px_rgb(255_255_255/0.15)]" : "text-text/70 hover:bg-white/10 hover:text-text"
+                }`}
+              >
+                {item.label}
+                <Count value={items.filter((x) => isInTab(x, item.key)).length} active={active} />
+              </button>
+            );
+          })}
         </div>
 
-        <div className="relative min-w-52 flex-1">
-          <Search size={18} className="absolute top-1/2 left-3 -translate-y-1/2 text-muted" />
+        <label className="glass group flex h-11 min-w-52 flex-1 items-center gap-2.5 rounded-full px-4 transition-shadow [--glass-fill:55%] focus-within:shadow-[inset_0_0_0_1px_rgb(255_255_255/0.3)]">
+          <Search size={17} className="shrink-0 text-muted group-focus-within:text-text" />
           <input
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder="Search your library"
-            className="w-full rounded-lg border border-line bg-panel py-2 pr-3 pl-10 outline-none placeholder:text-muted focus:border-muted"
+            className="h-full w-full bg-transparent text-sm outline-none placeholder:text-muted"
           />
-        </div>
+          {text && (
+            <button onClick={() => setText("")} aria-label="Clear search" className="rounded-full p-1 text-muted hover:bg-white/10 hover:text-text">
+              <X size={15} />
+            </button>
+          )}
+        </label>
 
-        <select
+        <Dropdown
           value={sort}
-          onChange={(event) => setSort(event.target.value)}
-          aria-label="Sort by"
-          className="rounded-lg border border-line bg-panel px-3 py-2 outline-none"
-        >
-          {SORTS.map((item) => (
-            <option key={item.key} value={item.key}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+          onChange={setSort}
+          options={SORTS.map((item) => ({ value: item.key, label: item.label }))}
+          icon={ArrowDownUp}
+          label="Sort by"
+          align="right"
+        />
 
-        <div className="flex rounded-lg border border-line bg-panel p-0.5">
-          <button
-            onClick={() => setView("grid")}
-            title="Grid"
-            aria-label="Show as grid"
-            className={`rounded-md p-1.5 ${view === "grid" ? "bg-panel-light" : "text-muted"}`}
-          >
-            <LayoutGrid size={18} />
-          </button>
-          <button
-            onClick={() => setView("list")}
-            title="List"
-            aria-label="Show as list"
-            className={`rounded-md p-1.5 ${view === "list" ? "bg-panel-light" : "text-muted"}`}
-          >
-            <List size={18} />
-          </button>
+        <div className="glass flex h-11 items-center gap-1 rounded-full p-1 [--glass-fill:55%]">
+          {[
+            { key: "grid", icon: LayoutGrid, label: "Show as grid" },
+            { key: "list", icon: List, label: "Show as list" },
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setView(item.key)}
+              title={item.label}
+              aria-label={item.label}
+              className={`flex size-9 items-center justify-center rounded-full transition-colors ${
+                view === item.key ? "bg-white text-page" : "text-muted hover:bg-white/10 hover:text-text"
+              }`}
+            >
+              <item.icon size={17} />
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
+      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-1">
         <StatusChip active={status === "all"} onClick={() => setStatus("all")} label="All" count={inTab.length} />
         {STATUSES.map((item) => (
           <StatusChip
@@ -169,17 +175,33 @@ export default function Library() {
   );
 }
 
+// small round number next to a tab or chip
+function Count({ value, active }) {
+  return (
+    <span
+      className={`min-w-5 rounded-full px-1.5 py-px text-center text-[11px] font-bold tabular-nums ${
+        active ? "bg-page/10 text-page" : "bg-white/10 text-text/70"
+      }`}
+    >
+      {value}
+    </span>
+  );
+}
+
 // "status" is empty for the "All" chip
 function StatusChip({ status, active, onClick, label, count }) {
   return (
     <button
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm whitespace-nowrap transition-colors ${
-        active ? "border-text bg-panel-light text-text" : "border-line text-muted hover:border-muted hover:text-text"
+      className={`flex h-9 shrink-0 items-center gap-2 rounded-full pr-1.5 pl-3.5 text-sm font-semibold whitespace-nowrap transition ${
+        active
+          ? "bg-white text-page"
+          : `glass text-text/80 [--glass-fill:45%] hover:bg-white/10 hover:text-text`
       }`}
     >
-      {status && <status.icon size={15} className={status.text} />}
-      {label} <span className="text-muted">{count}</span>
+      {status && <status.icon size={15} className={active ? "" : status.text} />}
+      {label}
+      <Count value={count} active={active} />
     </button>
   );
 }

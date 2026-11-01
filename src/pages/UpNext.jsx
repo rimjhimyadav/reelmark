@@ -54,7 +54,7 @@ export default function UpNext() {
       <PageTitle title="Up Next" text="The next episode of every show you’re watching." />
 
       {ready.length === 0 && waiting.length === 0 && movies.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-line p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center [--glass-fill:50%]">
           <h2 className="text-lg font-semibold">You’re all caught up</h2>
           <p className="mt-1 text-muted">Shows you mark as Watching will show up here with their next episode.</p>
         </div>
@@ -66,8 +66,8 @@ export default function UpNext() {
             <button
               key={item.key}
               onClick={() => setSort(item.key)}
-              className={`shrink-0 rounded-full border px-4 py-1.5 text-sm whitespace-nowrap transition-colors ${
-                sort === item.key ? "border-text bg-panel-light text-text" : "border-line text-muted hover:text-text"
+              className={`h-9 shrink-0 rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors ${
+                sort === item.key ? "bg-white text-page" : "glass text-text/75 [--glass-fill:45%] hover:bg-white/10 hover:text-text"
               }`}
             >
               {item.label}
@@ -87,9 +87,11 @@ export default function UpNext() {
           {/* last spot in the grid: a shortcut to find something new, so the page doesn't end in empty space */}
           <Link
             to="/explore"
-            className="flex aspect-video flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line text-muted transition-colors hover:border-muted hover:text-text"
+            className="glass group flex aspect-video flex-col items-center justify-center gap-3 rounded-2xl text-muted transition [--glass-fill:40%] hover:bg-white/10 hover:text-text"
           >
-            <Plus size={24} />
+            <span className="flex size-12 items-center justify-center rounded-full bg-white/10 transition group-hover:scale-110 group-hover:bg-white group-hover:text-page">
+              <Plus size={22} />
+            </span>
             <span className="font-semibold">Find another show</span>
           </Link>
         </div>
@@ -103,7 +105,7 @@ export default function UpNext() {
               <Link
                 key={show.id}
                 to={`/tv/${show.id}`}
-                className="flex items-center gap-4 rounded-xl bg-panel p-2.5 hover:bg-panel-light"
+                className="flex items-center gap-4 rounded-2xl bg-panel p-2.5 transition hover:bg-white/10"
               >
                 <img src={imageUrl(show.poster, "w92")} alt="" className="h-18 w-12 rounded-md object-cover" />
                 <div className="min-w-0 flex-1">
@@ -148,7 +150,7 @@ function NextEpisodeCard({ show }) {
 
   return (
     <div>
-      <Link to={`/tv/${show.id}`} className="group relative block aspect-video overflow-hidden rounded-xl bg-panel">
+      <Link to={`/tv/${show.id}`} className="group relative block aspect-video overflow-hidden rounded-2xl bg-panel ring-1 ring-white/10 transition hover:ring-white/25">
         {picture && (
           <img
             src={picture}
@@ -157,6 +159,16 @@ function NextEpisodeCard({ show }) {
               hideSpoilers ? "spoiler" : ""
             }`}
           />
+        )}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/60 to-transparent" />
+        <span className="absolute top-2.5 left-2.5 rounded-lg bg-black/55 px-2 py-0.5 text-xs font-bold backdrop-blur">
+          {episodeLabel(next.season, next.episode)}
+        </span>
+        {episode && episode.runtime > 0 && (
+          <span className="absolute right-2.5 bottom-3 rounded-lg bg-black/55 px-2 py-0.5 text-xs font-semibold backdrop-blur">
+            {formatRuntime(episode.runtime)}
+          </span>
         )}
 
         {/* thin progress line along the bottom edge */}
@@ -185,7 +197,7 @@ function NextEpisodeCard({ show }) {
           onClick={() => setEpisodes(show, next.season, [next.episode], true)}
           title="Mark as watched"
           aria-label={`Mark ${episodeLabel(next.season, next.episode)} of ${show.title} as watched`}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-text transition-transform hover:scale-110"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-page shadow-[0_6px_20px_-6px_rgb(255_255_255/0.5)] transition hover:scale-110"
         >
           <Check size={18} strokeWidth={3} />
         </button>
@@ -197,14 +209,14 @@ function NextEpisodeCard({ show }) {
 function MovieRow({ movie }) {
   const setStatus = useLibrary((state) => state.setStatus);
   return (
-    <div className="flex items-center gap-4 rounded-xl bg-panel p-2.5">
+    <div className="flex items-center gap-4 rounded-2xl bg-panel p-2.5">
       <img src={imageUrl(movie.poster, "w92")} alt="" className="h-18 w-12 rounded-md object-cover" />
       <Link to={`/movie/${movie.id}`} className="min-w-0 flex-1 truncate font-semibold hover:underline">
         {movie.title}
       </Link>
       <button
         onClick={() => setStatus(movie, "completed")}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg bg-panel-light px-3 py-2 text-sm font-semibold hover:bg-line"
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-semibold text-page hover:bg-white/90"
       >
         <Check size={16} strokeWidth={3} /> Finished
       </button>
