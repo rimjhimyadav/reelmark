@@ -35,7 +35,7 @@ Keep track of the movies, shows and anime you watch. Tick off episodes, see what
 
 ## Built with
 
-- React + Vite
+- React + TypeScript + Vite
 - React Router
 - Tailwind CSS
 - Zustand (the library is saved to localStorage with its `persist` middleware)
@@ -51,7 +51,8 @@ cp .env.example .env   # then put your TMDB API key in .env
 npm run dev
 ```
 
-`npm run lint` runs ESLint.
+- `npm run lint` runs ESLint
+- `npm run build` type-checks and builds
 
 ## Credits
 
