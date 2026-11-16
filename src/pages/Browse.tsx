@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useSearchParams } from "react-router";
 import { discover, getGenres, getProviders, type DiscoverOptions, type SortKey } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
-import { CalendarDays, Tv } from "lucide-react";
+import { CalendarDays, Languages, Tv } from "lucide-react";
+import { MOODS } from "../moods";
 import PageTitle from "../components/PageTitle";
 import Dropdown from "../components/Dropdown";
 import PosterCard, { PosterSkeleton } from "../components/PosterCard";
@@ -22,7 +23,31 @@ const SORTS: { key: SortKey; label: string }[] = [
 
 const DECADES = ["2020", "2010", "2000", "1990", "1980", "1970"];
 
-type FilterName = "type" | "sort" | "genre" | "provider" | "decade";
+// the language a title was made in. TMDB uses ISO 639-1 codes ("cn" is TMDB's own code for cantonese)
+const LANGUAGES = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "ko", label: "Korean" },
+  { value: "ja", label: "Japanese" },
+  { value: "ta", label: "Tamil" },
+  { value: "te", label: "Telugu" },
+  { value: "ml", label: "Malayalam" },
+  { value: "kn", label: "Kannada" },
+  { value: "bn", label: "Bengali" },
+  { value: "mr", label: "Marathi" },
+  { value: "es", label: "Spanish" },
+  { value: "fr", label: "French" },
+  { value: "zh", label: "Chinese" },
+  { value: "cn", label: "Cantonese" },
+  { value: "th", label: "Thai" },
+  { value: "tr", label: "Turkish" },
+];
+
+// genre ids that mean the same thing for movies and shows, these are kept when you switch between them
+// (the others, like thriller or "sci-fi & fantasy", only exist on one side)
+const SHARED_GENRES = ["16", "35", "80", "99", "18", "10751", "9648", "37"];
+
+type FilterName = "type" | "sort" | "genre" | "provider" | "decade" | "lang" | "mood";
 
 // the "see all" page of explore: a grid with filters
 export default function Browse() {
@@ -32,15 +57,23 @@ export default function Browse() {
   // anything we don't know in the url falls back to the first option
   const type = (TYPES.find((item) => item.key === searchParams.get("type")) || TYPES[0]).key;
   const sort = (SORTS.find((item) => item.key === searchParams.get("sort")) || SORTS[0]).key;
+  // a mood (from the explore tiles) has a movie and a tv version (see moods.ts),
+  // so it stays when you switch between movies, shows and anime
+  const mood = MOODS.find((item) => item.key === searchParams.get("mood"));
   const genre = searchParams.get("genre") || "";
   const provider = searchParams.get("provider") || "";
   const decade = searchParams.get("decade") || "";
+  // anime is always japanese, so it has no language filter
+  const lang = type === "anime" ? "" : searchParams.get("lang") || "";
   const name = searchParams.get("name") || "";
 
   function changeFilter(filterName: FilterName, value: string) {
-    const params: Record<string, string> = { type, sort, genre, provider, decade };
+    const params: Record<string, string> = { type, sort, genre, provider, decade, lang, mood: mood?.key || "" };
     params[filterName] = value;
-    if (filterName === "type") params.genre = ""; // movie and tv genres are different
+    // movie and tv genres are different, only keep the ones that exist on both sides
+    if (filterName === "type" && !genre.split(",").every((id) => SHARED_GENRES.includes(id))) params.genre = "";
+    if (filterName === "genre") params.mood = ""; // picking a genre replaces the mood
+    if (params.type === "anime") params.lang = "";
     // leave empty filters out of the url
     for (const key in params) {
       if (!params[key]) delete params[key];
@@ -52,7 +85,7 @@ export default function Browse() {
 
   return (
     <>
-      <PageTitle title={name || typeLabel} text="Find something new to watch." />
+      <PageTitle title={mood?.name || name || typeLabel} text="Find something new to watch." />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         {/* same pills as the library toolbar: glass, 44px high, white when picked */}
@@ -94,18 +127,30 @@ export default function Browse() {
           icon={CalendarDays}
           label="Decade"
         />
+        {type !== "anime" && (
+          <Dropdown
+            value={lang}
+            onChange={(value) => changeFilter("lang", value)}
+            options={[{ value: "", label: "Any language" }, ...LANGUAGES]}
+            icon={Languages}
+            label="Language"
+          />
+        )}
       </div>
 
-      <GenreChips type={type} genre={genre} onChange={(id) => changeFilter("genre", id)} />
+      {/* with a mood on, no genre chip is picked (not even "all") */}
+      <GenreChips type={type} genre={mood ? "mood" : genre} onChange={(id) => changeFilter("genre", id)} />
 
       {/* a new key = a brand new Results, so the list starts from page 1 again */}
       <Results
-        key={[type, sort, genre, provider, decade].join("-")}
+        key={[type, sort, genre, provider, decade, lang, mood?.key].join("-")}
         type={type}
         sort={sort}
         genre={genre}
         provider={provider}
         decade={decade}
+        language={lang}
+        mood={mood}
       />
     </>
   );
@@ -159,7 +204,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
   );
 }
 
-function Results({ type, sort, genre, provider, decade }: Omit<DiscoverOptions, "page">) {
+function Results({ type, sort, genre, provider, decade, language, mood }: Omit<DiscoverOptions, "page">) {
   const [items, setItems] = useState<Item[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -171,7 +216,7 @@ function Results({ type, sort, genre, provider, decade }: Omit<DiscoverOptions, 
   useEffect(() => {
     let ignore = false;
 
-    discover({ type, sort, genre, provider, decade, page })
+    discover({ type, sort, genre, provider, decade, language, mood, page })
       .then((result) => {
         if (ignore) return;
         // popular lists change while you scroll, so a title can come back on the next page
@@ -192,7 +237,7 @@ function Results({ type, sort, genre, provider, decade }: Omit<DiscoverOptions, 
     return () => {
       ignore = true;
     };
-  }, [type, sort, genre, provider, decade, page]);
+  }, [type, sort, genre, provider, decade, language, mood, page]);
 
   // infinite scroll: when the empty div under the grid gets close to the screen, load the next page
   useEffect(() => {

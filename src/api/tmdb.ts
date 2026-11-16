@@ -1,6 +1,7 @@
 // everything that talks to TMDB lives in this file
 // docs: https://developer.themoviedb.org/docs
-import type { BrowseType, CastMember, Details, Episode, Item, MediaType, Provider, Season, ShowInfo } from "../types";
+import type { Mood } from "../moods";
+import type { BrowseType, CastMember, Credit, Details, Episode, Item, MediaType, Person, Provider, Season, ShowInfo } from "../types";
 
 // the parts of TMDB's answers we use (TMDB sends a lot more)
 interface RawResult {
@@ -94,6 +95,7 @@ const BASE_URL = "https://api.tmdb.org/3";
 // so anime = japanese animation shows (without kids shows)
 const ANIMATION = 16;
 const KIDS = 10762;
+const DRAMA = 18;
 
 // answers we already got, so two parts of a page asking for the same thing only load it once
 // (like the explore tiles and the rows under them). it's cleared when you refresh the page
@@ -183,6 +185,16 @@ export async function getPopularAnime() {
   return toItems(data, "tv");
 }
 
+// popular korean dramas, for the explore tile and row
+export async function getPopularKDramas() {
+  const data = await get<RawList>("/discover/tv", {
+    with_original_language: "ko",
+    with_genres: DRAMA,
+    sort_by: "popularity.desc",
+  });
+  return toItems(data, "tv");
+}
+
 export async function getUpcomingMovies() {
   const today = new Date().toISOString().slice(0, 10);
   const data = await get<RawList>("/discover/movie", {
@@ -243,16 +255,20 @@ const SORT_PARAMS: Record<SortKey, Params> = {
 // used by the explore "see all" page: one page of movies, shows or anime
 // genre can be one id ("35") or a few ("35,10751" = has all of them)
 // provider is a streaming service id, decade is like 1990
+// language is the language it was made in ("ko" = korean), anime is always japanese so it's ignored there
+// mood is one of the explore mood tiles, it has its own genres for movies and for shows
 export interface DiscoverOptions {
   type: BrowseType;
   sort: SortKey;
   genre?: string | null;
   provider?: string | null;
   decade?: string | null;
+  language?: string | null;
+  mood?: Mood;
   page: number;
 }
 
-export async function discover({ type, sort, genre, provider, decade, page }: DiscoverOptions) {
+export async function discover({ type, sort, genre, provider, decade, language, mood, page }: DiscoverOptions) {
   const apiType = type === "movie" ? "movie" : "tv";
   const dateField = apiType === "movie" ? "primary_release_date" : "first_air_date";
   const today = new Date().toISOString().slice(0, 10);
@@ -269,7 +285,16 @@ export async function discover({ type, sort, genre, provider, decade, page }: Di
     params.with_original_language = "ja";
     params.without_genres = KIDS;
   }
+  if (language && type !== "anime") params.with_original_language = language;
   if (genre) genres.push(genre);
+
+  if (mood) {
+    const moodFilter = apiType === "movie" ? mood.movie : mood.tv;
+    if (moodFilter.genres) genres.push(moodFilter.genres);
+    if (moodFilter.keyword) params.with_keywords = moodFilter.keyword;
+    // without this, kids cartoons fill the top of most tv moods ("feel-good" = spongebob)
+    if (type === "tv") params.without_genres = `${ANIMATION},${KIDS}`;
+  }
   if (genres.length > 0) params.with_genres = genres.join(",");
 
   if (provider) {
@@ -474,4 +499,100 @@ export async function getDetails(type: MediaType, id: number): Promise<Details> 
 // other sites' ids for a title (imdb, tvdb...), used to find the show on TVmaze for air times
 export async function getExternalIds(type: MediaType, id: number) {
   return get<ExternalIds>(`/${type}/${id}/external_ids`);
+}
+
+// one line of a person's filmography. TMDB sends both a cast list and a crew list
+interface RawCredit extends RawResult {
+  character?: string;
+  episode_count?: number;
+  job?: string;
+  department?: string;
+  vote_count?: number;
+}
+
+interface RawPersonDetails {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  known_for_department: string;
+  profile_path: string | null;
+  combined_credits: { cast: RawCredit[]; crew: RawCredit[] };
+  external_ids: { imdb_id: string | null; instagram_id: string | null };
+}
+
+// talk shows and news: popular actors show up in hundreds of these as guests,
+// they would bury the real roles
+const TALK = 10767;
+const NEWS = 10763;
+
+// "Self", "Himself - Guest", "Herself (archive footage)"... playing yourself isn't a role
+function isSelf(character: string) {
+  return /^(self|himself|herself|themselves|themself)\b/i.test(character.trim());
+}
+
+// turns a cast or crew list into one card per title (titles without a poster are left out).
+// one person can be in a title twice (two roles, or director + writer), so those are joined: "Writer, Director"
+function toCredits(raw: RawCredit[], getRole: (credit: RawCredit) => string): Credit[] {
+  const byTitle = new Map<string, Credit>();
+
+  for (const credit of raw) {
+    if (credit.media_type !== "movie" && credit.media_type !== "tv") continue;
+    // no poster = usually an announced project with nothing else on TMDB yet, it would just be an empty card
+    if (!credit.poster_path) continue;
+    const genres = credit.genre_ids || [];
+    if (genres.includes(TALK) || genres.includes(NEWS)) continue;
+
+    const key = credit.media_type + credit.id;
+    const role = getRole(credit);
+    const old = byTitle.get(key);
+    if (old) {
+      if (role && !old.role.split(", ").includes(role)) old.role = old.role ? `${old.role}, ${role}` : role;
+      continue;
+    }
+    byTitle.set(key, {
+      ...toItem(credit),
+      role,
+      episodes: credit.episode_count || 0,
+      votes: credit.vote_count || 0,
+    });
+  }
+  return [...byTitle.values()];
+}
+
+// everything for the person page in one request: who they are, and everything they were in
+export async function getPerson(id: number): Promise<Person> {
+  const data = await get<RawPersonDetails>(`/person/${id}`, { append_to_response: "combined_credits,external_ids" });
+
+  const acting = toCredits(
+    data.combined_credits.cast.filter((credit) => !isSelf(credit.character || "")),
+    (credit) => credit.character || "",
+  );
+
+  // crew split by department ("Directing", "Writing"...)
+  const crewByDepartment: Record<string, RawCredit[]> = {};
+  for (const credit of data.combined_credits.crew) {
+    const department = credit.department || "Crew";
+    (crewByDepartment[department] ||= []).push(credit);
+  }
+  const crew: Record<string, Credit[]> = {};
+  for (const department in crewByDepartment) {
+    crew[department] = toCredits(crewByDepartment[department], (credit) => credit.job || "");
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    bio: data.biography,
+    birthday: data.birthday,
+    deathday: data.deathday,
+    birthplace: data.place_of_birth,
+    knownFor: data.known_for_department,
+    photo: data.profile_path,
+    imdbId: data.external_ids.imdb_id,
+    instagram: data.external_ids.instagram_id,
+    credits: { Acting: acting, ...crew },
+  };
 }

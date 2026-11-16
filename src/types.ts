@@ -65,6 +65,28 @@ export interface CastMember {
   photo: string | null;
 }
 
+// one title on a person's page, with what they did in it
+export interface Credit extends Item {
+  role: string; // the character they played, or their job ("Director")
+  episodes: number; // for shows: how many episodes they're in
+  votes: number; // how many people rated it on TMDB, used for "known for"
+}
+
+// everything on the person page
+export interface Person {
+  id: number;
+  name: string;
+  bio: string;
+  birthday: string | null;
+  deathday: string | null;
+  birthplace: string | null;
+  knownFor: string; // TMDB's main department: "Acting", "Directing"...
+  photo: string | null;
+  imdbId: string | null;
+  instagram: string | null;
+  credits: Record<string, Credit[]>; // department -> titles, "Acting" is always there
+}
+
 export interface Review {
   id: string;
   author: string;

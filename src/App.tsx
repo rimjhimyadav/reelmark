@@ -10,6 +10,7 @@ import Explore from "./pages/Explore";
 import Browse from "./pages/Browse";
 import Search from "./pages/Search";
 import DetailsPage from "./pages/Details";
+import PersonPage from "./pages/Person";
 import Library from "./pages/Library";
 import UpNext from "./pages/UpNext";
 import Calendar from "./pages/Calendar";
@@ -62,6 +63,7 @@ export default function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/movie/:id" element={<DetailsPage type="movie" />} />
           <Route path="/tv/:id" element={<DetailsPage type="tv" />} />
+          <Route path="/person/:id" element={<PersonPage />} />
           <Route path="/library" element={<Library />} />
           <Route path="/up-next" element={<UpNext />} />
           <Route path="/calendar" element={<Calendar />} />

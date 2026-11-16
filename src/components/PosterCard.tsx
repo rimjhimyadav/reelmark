@@ -6,7 +6,8 @@ import { getPosterColor } from "../posterColor";
 import type { Item } from "../types";
 
 // badge: extra tag at the bottom, like "In 3 days" on upcoming movies
-export type CardItem = Item & { badge?: string };
+// role: an extra grey line under the title, like the character an actor played
+export type CardItem = Item & { badge?: string; role?: string };
 
 export default function PosterCard({ item }: { item: CardItem }) {
   // the poster's own color, only worked out the first time you hover (so long rows stay fast)
@@ -50,8 +51,10 @@ export default function PosterCard({ item }: { item: CardItem }) {
 
       <h3 className="mt-2 truncate text-sm font-semibold">{item.title}</h3>
       <p className="text-xs text-muted">
-        {item.year} · {item.type === "movie" ? "Movie" : "Show"}
+        {/* titles that are only announced have no year yet */}
+        {[item.year, item.type === "movie" ? "Movie" : "Show"].filter(Boolean).join(" · ")}
       </p>
+      {item.role && <p className="truncate text-xs text-text/60 italic">{item.role}</p>}
     </Link>
   );
 }

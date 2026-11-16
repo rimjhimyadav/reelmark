@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { ExternalLink, Play, Star } from "lucide-react";
 import { backdropSrcSet, getDetails, imageUrl } from "../api/tmdb";
 import useFetch from "../hooks/useFetch";
@@ -185,15 +185,21 @@ function Cast({ cast }: { cast: CastMember[] }) {
       <SectionTitle title="Who's in it" />
       <div className="no-scrollbar flex gap-4 overflow-x-auto">
         {cast.map((person) => (
-          <div key={person.id} className="w-24 shrink-0 text-center">
-            <div className="mx-auto size-20 overflow-hidden rounded-full bg-panel-light">
+          // opens their page with everything else they were in
+          <Link key={person.id} to={`/person/${person.id}`} className="group w-24 shrink-0 text-center">
+            <div className="mx-auto size-20 overflow-hidden rounded-full bg-panel-light ring-2 ring-transparent transition group-hover:ring-accent">
               {person.photo && (
-                <img src={imageUrl(person.photo, "w185")} alt={person.name} loading="lazy" className="size-full object-cover" />
+                <img
+                  src={imageUrl(person.photo, "w185")}
+                  alt={person.name}
+                  loading="lazy"
+                  className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
+                />
               )}
             </div>
-            <p className="mt-2 line-clamp-2 text-sm font-medium">{person.name}</p>
+            <p className="mt-2 line-clamp-2 text-sm font-medium group-hover:text-accent">{person.name}</p>
             <p className="line-clamp-2 text-xs text-muted">{person.character}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

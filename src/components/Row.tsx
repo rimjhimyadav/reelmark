@@ -47,7 +47,8 @@ export function PosterRow({ title, note, items }: TitleProps & { items: CardItem
         ))}
 
         {items && items.map((item) => (
-          <div key={item.id} className="w-36 shrink-0 snap-start md:w-44">
+          // a movie and a show can have the same id (a person's page has both)
+          <div key={item.type + item.id} className="w-36 shrink-0 snap-start md:w-44">
             <PosterCard item={item} />
           </div>
         ))}

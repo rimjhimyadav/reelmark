@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { ArrowRight, Brain, Clapperboard, Ghost, Heart, Mountain, Smile, Sparkles, Tv, Zap, type LucideIcon } from "lucide-react";
+import { ArrowRight, Clapperboard, Drama, Sparkles, Tv, type LucideIcon } from "lucide-react";
 import {
   getGenres,
   getHiddenGems,
   getPopularAnime,
+  getPopularKDramas,
   getProviders,
   getSeasonalMovies,
   getTopTen,
@@ -14,6 +15,7 @@ import {
   imageUrl,
 } from "../api/tmdb";
 import { getSeason } from "../seasons";
+import { MOODS } from "../moods";
 import { countdown } from "../utils";
 import useFetch from "../hooks/useFetch";
 import PageTitle from "../components/PageTitle";
@@ -39,16 +41,8 @@ const TYPES: TypeTileInfo[] = [
   { label: "Movies", icon: Clapperboard, filters: { type: "movie" }, load: getTrendingMovies },
   { label: "Shows", icon: Tv, filters: { type: "tv" }, load: getTrendingShows },
   { label: "Anime", icon: Sparkles, filters: { type: "anime" }, load: getPopularAnime },
-];
-
-// moods are just genre mixes. a comma means "has all of these genres"
-const MOODS = [
-  { name: "Feel-good", genre: "35,10751", icon: Smile, color: "from-yellow-500/40" },
-  { name: "Mind-bending", genre: "878,9648", icon: Brain, color: "from-violet-500/40" },
-  { name: "Edge of your seat", genre: "53", icon: Zap, color: "from-red-500/40" },
-  { name: "Date night", genre: "10749,35", icon: Heart, color: "from-pink-500/40" },
-  { name: "Can't sleep after this", genre: "27", icon: Ghost, color: "from-slate-400/40" },
-  { name: "Epic adventures", genre: "12,14", icon: Mountain, color: "from-emerald-500/40" },
+  // korean shows with the drama genre (18), so variety and reality shows stay out
+  { label: "K-Dramas", icon: Drama, filters: { type: "tv", lang: "ko", genre: "18", name: "K-Dramas" }, load: getPopularKDramas },
 ];
 
 const DECADES = ["1970", "1980", "1990", "2000", "2010", "2020"];
@@ -70,7 +64,7 @@ export default function Explore() {
     <>
       <PageTitle title="Explore" text="Find something new to watch." />
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {TYPES.map((item) => (
           <TypeTile key={item.label} item={item} />
         ))}
@@ -87,6 +81,7 @@ export default function Explore() {
         load={getComingSoon}
       />
       <Row title="Popular anime right now" load={getPopularAnime} />
+      <Row title="K-dramas everyone's hooked on" load={getPopularKDramas} />
       <Providers />
 
       <Section title="What are you in the mood for?">
@@ -94,7 +89,7 @@ export default function Explore() {
           {MOODS.map((mood) => (
             <Link
               key={mood.name}
-              to={browseLink({ type: "movie", genre: mood.genre, name: mood.name })}
+              to={browseLink({ type: "movie", mood: mood.key })}
               className={`flex items-center gap-3 rounded-2xl bg-linear-to-br ${mood.color} to-panel p-5 font-bold transition-transform hover:scale-[1.02]`}
             >
               <mood.icon size={24} />
