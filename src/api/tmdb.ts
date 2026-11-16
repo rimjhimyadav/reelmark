@@ -243,10 +243,14 @@ export async function getRecommendations(type: MediaType, id: number) {
 }
 
 // sort options for the explore page
-export type SortKey = "popular" | "top" | "new";
+export type SortKey = "popular" | "all-time" | "top" | "new";
 
 const SORT_PARAMS: Record<SortKey, Params> = {
+  // TMDB's "popularity" is worked out every day from recent views, votes and watchlist adds,
+  // so it's what's trending right now, not the most popular ever
   popular: { sort_by: "popularity.desc" },
+  // all-time: the titles the most people have ever rated
+  "all-time": { sort_by: "vote_count.desc" },
   // without a minimum vote count, a movie with one 10/10 vote would be on top
   top: { sort_by: "vote_average.desc", "vote_count.gte": 300 },
   new: { sort_by: "date.desc", "vote_count.gte": 20 },

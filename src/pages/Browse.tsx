@@ -16,7 +16,9 @@ const TYPES: { key: BrowseType; label: string }[] = [
 ];
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: "popular", label: "Popular" },
+  // the key stays "popular" so old links (?sort=popular) keep working
+  { key: "popular", label: "Trending" },
+  { key: "all-time", label: "All-time" },
   { key: "top", label: "Top rated" },
   { key: "new", label: "Newest" },
 ];
